@@ -4,6 +4,12 @@ This repository provides a small helper script that sends SECRA OP tracking even
 
 File: `src/op-gtm.js`
 
+## About SECRA and SECRA OP
+SECRA is a provider focused on marketing and technology for holiday accommodation (vacation rentals) in German-speaking markets. Their solutions help destinations, agencies, and property managers market and book inventory across channels and on their own websites.
+
+- SECRA OP refers to SECRA’s online booking/operations widgets embedded on client websites. These widgets expose tracking hooks on `window.secra_op_client.tracking` that this script listens to.
+- SECRA also offers tools like the FeWo Channelmanager (https://www.fewo-channelmanager.de/) for channel distribution and FeWo Agent (https://www.fewo-agent.de/) for agency websites and booking flows. Company site: https://www.secra.de/.
+
 What it does
 - Initializes `window.dataLayer` if it does not exist yet.
 - Hooks into the global `window.secra_op_client.tracking` object exposed by SECRA OP.
