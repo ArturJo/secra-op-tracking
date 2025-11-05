@@ -6,47 +6,60 @@
  */
 
 window.dataLayer = window.dataLayer || [];
-var secra_op_client = window.secra_op_client || {};
-secra_op_client.tracking = secra_op_client.tracking || {};
-secra_op_client.tracking.search = secra_op_client.tracking.search || {};
-secra_op_client.tracking.object = secra_op_client.tracking.object || {};
-secra_op_client.tracking.booking = secra_op_client.tracking.booking || {};
+window.secra_op_client = window.secra_op_client || {};
+window.secra_op_client.tracking = window.secra_op_client.tracking || {};
+window.secra_op_client.tracking.search = window.secra_op_client.tracking.search || {};
+window.secra_op_client.tracking.object = window.secra_op_client.tracking.object || {};
+window.secra_op_client.tracking.booking = window.secra_op_client.tracking.booking || {};
 
 // Wait until the DOM is fully loaded before registering event handlers
 document.addEventListener('DOMContentLoaded', function () {
     // Push an "object view" event for a holiday accommodation into the dataLayer
-    var sendObjektaufrufFerienunterkunft = function (mod, event, data) {
+    var sendObjectView = function (mod, event, data) {
         if (!data || !data.ObjMetaNr) {
             return;
         }
         dataLayer.push({
-            event: 'objectView',
+            event: 'secraOpObjectView',
             eventCategory: 'OP Holiday Accommodation',
             eventAction: 'Object View',
-            objectId: data.ObjMetaNr
+            objectId: data.ObjMetaNr,
+            // SECRA aliases for clarity in GTM (use these if you prefer vendor-prefixed keys)
+            secraObjectId: data.ObjMetaNr,
+            secraEventAction: 'OP Event: Objekt: load',
+            secraEventCategory: 'Objekt:load',
+            secraVendor: 'SECRA OP'
         });
     };
 
     // Push a successful booking event for a holiday accommodation into the dataLayer
-    var sendBuchungFerienunterkunft = function (mod, event, data) {
+    var sendBookingSuccess = function (mod, event, data) {
         if (!data || !data.ObjMetaNr || !data.BuchungNr) {
             return;
         }
         dataLayer.push({
-            event: 'objectBooking',
+            event: 'secraOpObjectBooking',
             eventCategory: 'OP Holiday Accommodation',
             eventAction: 'Booking Success',
             objectId: data.ObjMetaNr,
             objectName: data.name || '',
             objectBookingNumber: data.BuchungNr,
-            objectBookingPrice: data.price || ''
+            objectBookingPrice: data.price || '',
+            // SECRA aliases for clarity in GTM (use these if you prefer vendor-prefixed keys)
+            secraObjectId: data.ObjMetaNr,
+            secraObjectName: data.name || '',
+            secraObjectBookingNumber: data.BuchungNr,
+            secraObjectBookingPrice: data.price || '',
+            secraEventAction: 'OP Event: Buchungsstrecke: submit-success',
+            secraEventCategory: 'Buchungsstrecke:submit-success',
+            secraVendor: 'SECRA OP'
         });
     };
 
     // Register handlers with the SECRA OP client tracking hooks
     var initEvents = function () {
-        secra_op_client.tracking.object.load = sendObjektaufrufFerienunterkunft;
-        secra_op_client.tracking.booking['submit-success'] = sendBuchungFerienunterkunft;
+        window.secra_op_client.tracking.object.load = sendObjectView;
+        window.secra_op_client.tracking.booking['submit-success'] = sendBookingSuccess;
     };
 
     initEvents();
