@@ -40,7 +40,6 @@
             }
             var params = {
                 // Generic keys
-                event: 'secraOpObjectView',
                 eventCategory: 'OP Holiday Accommodation',
                 eventAction: 'Object View',
                 objectId: data.ObjMetaNr,
@@ -60,7 +59,6 @@
             }
             var params = {
                 // Generic keys
-                event: 'secraOpObjectBooking',
                 eventCategory: 'OP Holiday Accommodation',
                 eventAction: 'Booking Success',
                 objectId: data.ObjMetaNr,
