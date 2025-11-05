@@ -9,7 +9,7 @@ File: `src/op-gtag.js` (GA4 / gtag)
 SECRA is a provider focused on marketing and technology for holiday accommodation (vacation rentals) in German-speaking markets. Their solutions help destinations, agencies, and property managers market and book inventory across channels and on their own websites.
 
 - SECRA OP refers to SECRA’s online booking/operations widgets embedded on client websites. These widgets expose tracking hooks on `window.secra_op_client.tracking` that this script listens to.
-- SECRA also offers tools like the FeWo Channelmanager (https://www.fewo-channelmanager.de/) for channel distribution and FeWo Agent (https://www.fewo-agent.de/) for agency websites and booking flows. Company site: https://www.secra.de/.
+- SECRA also offers tools like the <a href="https://www.fewo-channelmanager.de/" target="_blank" rel="noopener noreferrer">FeWo Channelmanager</a> for channel distribution and <a href="https://www.fewo-agent.de/" target="_blank" rel="noopener noreferrer">FeWo Agent</a> for agency websites and booking flows. Company site: <a href="https://www.secra.de/" target="_blank" rel="noopener noreferrer">https://www.secra.de/</a>.
 
 ## Base tags (in <head>)
 
