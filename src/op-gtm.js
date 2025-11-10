@@ -28,7 +28,13 @@ document.addEventListener('DOMContentLoaded', function () {
             secraObjectId: data.ObjMetaNr,
             secraEventAction: 'OP Event: Objekt: load',
             secraEventCategory: 'Objekt:load',
-            secraVendor: 'SECRA OP'
+            secraVendor: 'SECRA OP',
+            // GA4-Parameter
+            event_category: 'OP Holiday Accommodation',
+            event_action: 'Object View',
+            content_type: 'vacation_rental',
+            item_id: data.ObjMetaNr,
+            item_category: 'OP Holiday Accommodation',
         });
     };
 
@@ -52,7 +58,16 @@ document.addEventListener('DOMContentLoaded', function () {
             secraObjectBookingPrice: data.price || '',
             secraEventAction: 'OP Event: Buchungsstrecke: submit-success',
             secraEventCategory: 'Buchungsstrecke:submit-success',
-            secraVendor: 'SECRA OP'
+            secraVendor: 'SECRA OP',
+            // GA4-Parameter
+            event_category: 'OP Holiday Accommodation',
+            event_action: 'Booking Success',
+            transaction_id: data.BuchungNr,
+            value: parseFloat(data.price) || 0,
+            currency: 'EUR',
+            content_type: 'vacation_rental',
+            item_id: data.ObjMetaNr,
+            item_category: 'OP Holiday Accommodation',
         });
     };
 
