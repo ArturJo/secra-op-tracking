@@ -39,6 +39,12 @@
                 return;
             }
             var params = {
+                // GA4-Parameter
+                event_category: 'OP Holiday Accommodation',
+                event_action: 'Object View',
+                item_id: data.ObjMetaNr,
+                item_category: 'OP Holiday Accommodation',
+                content_type: 'vacation_rental',
                 // Generic keys
                 eventCategory: 'OP Holiday Accommodation',
                 eventAction: 'Object View',
@@ -58,6 +64,15 @@
                 return;
             }
             var params = {
+                // GA4-Parameter
+                event_category: 'OP Holiday Accommodation',
+                event_action: 'Booking Success',
+                transaction_id: data.BuchungNr,
+                value: parseFloat(data.price) || 0,
+                currency: 'EUR',
+                content_type: 'vacation_rental',
+                item_id: data.ObjMetaNr,
+                item_category: 'OP Holiday Accommodation',
                 // Generic keys
                 eventCategory: 'OP Holiday Accommodation',
                 eventAction: 'Booking Success',
@@ -86,3 +101,4 @@
         initEvents();
     });
 })();
+l
