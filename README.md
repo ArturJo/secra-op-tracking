@@ -5,6 +5,8 @@ Kleine Hilfsskripte, um Tracking-Events der SECRA OP Widgets entweder in den Goo
 Dateien:
 - src/op-gtm.js (GTM / dataLayer)
 - src/op-gtag.js (GA4 / gtag)
+- GTM-Events-Anleitung.md (Schritt-für-Schritt-Anleitung für GTM Events und Conversions)
+- GA4-gtag-Anleitung.md (Schritt-für-Schritt-Anleitung für direkte GA4/gtag Einrichtung)
 
 Wichtig:
 - Pro Seite nur eine Variante verwenden (GTM oder GA4). Beide gleichzeitig führt zu Doppeltracking.
