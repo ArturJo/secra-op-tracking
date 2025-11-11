@@ -1,21 +1,18 @@
 # SECRA OP Tracking
 
-This repository provides small helper scripts to forward SECRA OP tracking events either to Google Tag Manager (GTM) or directly to Google Analytics 4 (GA4 via gtag.js).
+Kleine Hilfsskripte, um Tracking-Events der SECRA OP Widgets entweder in den Google Tag Manager (GTM, dataLayer) oder direkt an Google Analytics 4 (GA4 via gtag.js) zu senden.
 
-File: `src/op-gtm.js` (GTM / dataLayer)
-File: `src/op-gtag.js` (GA4 / gtag)
+Dateien:
+- src/op-gtm.js (GTM / dataLayer)
+- src/op-gtag.js (GA4 / gtag)
 
-## About SECRA and SECRA OP
-SECRA is a provider focused on marketing and technology for holiday accommodation (vacation rentals) in German-speaking markets. Their solutions help destinations, agencies, and property managers market and book inventory across channels and on their own websites.
+Wichtig:
+- Pro Seite nur eine Variante verwenden (GTM oder GA4). Beide gleichzeitig führt zu Doppeltracking.
+- Die Basis-Snippets (GTM-Container oder GA4 gtag) gehören in den Head. Diese immer aus dem eigenen Google-Konto kopieren und aktuell halten.
 
-- SECRA OP refers to SECRA’s online booking/operations widgets embedded on client websites. These widgets expose tracking hooks on `window.secra_op_client.tracking` that this script listens to.
-- SECRA also offers tools like the <a href="https://www.fewo-channelmanager.de/" target="_blank" rel="noopener noreferrer">FeWo Channelmanager</a> for channel distribution and <a href="https://www.fewo-agent.de/" target="_blank" rel="noopener noreferrer">FeWo Agent</a> for agency websites and booking flows. Company site: <a href="https://www.secra.de/" target="_blank" rel="noopener noreferrer">https://www.secra.de/</a>.
+## Voraussetzungen (Head-Snippets)
 
-## Base tags (in <head>)
-
-Before using these integration scripts, ensure you have installed the required base tags from Google. Always copy the official snippets from your own Google accounts and keep them up to date.
-
-- Google Tag Manager base tag: place the script in <head> and the noscript immediately after the opening <body>.
+GTM Basis-Tag (in <head>, Noscript direkt nach <body>):
 
 ```html
 <!-- Google Tag Manager -->
@@ -33,7 +30,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 ```
 
-- GA4 base tag (gtag.js): place in <head>.
+GA4 Basis-Tag (gtag.js, in <head>):
 
 ```html
 <!-- GA4 base tag example -->
@@ -46,184 +43,140 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </script>
 ```
 
-Notes:
-- Only one tracking platform should actively send events on a single page: either GTM (which can also feed GA4 via a GA4 Configuration Tag) OR native GA4 via gtag.js.
-- The exact snippets can change over time; always verify against the versions provided by Google in your accounts.
+Hinweise:
+- Nur eine aktive Sendequelle je Seite: GTM oder natives GA4/gtag.
+- Snippets können sich ändern – bitte mit den aktuellen Vorgaben in Ihrem Google‑Konto abgleichen.
 
-## Important: Script placement (before </body>)
+## Einbindung der Skripte (vor </body>)
 
-- Place the script tag right before the closing </body> tag. This applies to both variants (GTM and GA4/gtag).
-- Do not include both scripts on the same page — choose GTM OR GA4 to avoid double tracking.
-- Reminder: Base tags (GTM container or GA4 gtag) belong in <head> (and GTM noscript right after <body>), copied from your Google account.
+- Skript direkt vor dem schließenden </body> einbinden (gilt für beide Varianten).
+- Nicht beide Skripte gleichzeitig verwenden.
 
-GTM (dataLayer) example:
+GTM (dataLayer) Beispiel:
 
 ```html
-<!-- page content ... -->
-
-<!-- Place just before the closing body tag -->
+<!-- Seite/Inhalt ... -->
+<!-- direkt vor </body> -->
 <script src="/path/to/src/op-gtm.js"></script>
 </body>
 ```
 
-GA4 (gtag) example:
+GA4 (gtag) Beispiel:
 
 ```html
-<!-- Place just before the closing body tag -->
+<!-- direkt vor </body> -->
 <script src="/path/to/src/op-gtag.js"></script>
 </body>
 ```
 
-## Google Tag Manager (GTM) integration
+## Google Tag Manager (GTM) – src/op-gtm.js
 
-File: `src/op-gtm.js`
+Funktion:
+- Initialisiert `window.dataLayer` (falls nicht vorhanden).
+- Registriert Event‑Handler an `window.secra_op_client.tracking`.
+- Pusht zwei Custom Events in den dataLayer.
 
-What it does
-- Initializes `window.dataLayer` if it does not exist yet.
-- Hooks into the global `window.secra_op_client.tracking` object exposed by SECRA OP.
-- Pushes structured events to the `dataLayer` for two main actions:
-  - Object view of a holiday accommodation (event name `secraOpObjectView`).
-  - Successful booking of a holiday accommodation (event name `secraOpObjectBooking`).
+Gesendete Events und Payloads:
 
-Events sent to dataLayer
-1) Object view
-   - Triggered when `window.secra_op_client.tracking.object.load` fires.
-   - Payload example:
-     {
-       event: 'secraOpObjectView',
-       eventCategory: 'OP Holiday Accommodation',
-       eventAction: 'Object View',
-       objectId: <ObjMetaNr>,
-       // SECRA-prefixed alias keys (in addition to the generic keys above)
-       secraObjectId: <ObjMetaNr>,
-       secraEventAction: 'OP Event: Objekt: load',
-       secraEventCategory: 'Objekt:load',
-       secraVendor: 'SECRA OP'
-     }
-   - Required data fields from SECRA OP: `ObjMetaNr`.
+1) Objektansicht (Ferienunterkunft)
+- Auslöser: `window.secra_op_client.tracking.object.load`
+- Beispiel‑Payload (dataLayer Push):
+```json
+{
+  "event": "secra_op_object_view",
+  "object_id": "<ObjMetaNr>",
+  "content_type": "vacation_rental"
+}
+```
+- Pflichtfeld: `ObjMetaNr`.
 
-2) Booking success
-   - Triggered when `window.secra_op_client.tracking.booking['submit-success']` fires.
-   - Payload example:
-     {
-       event: 'secraOpObjectBooking',
-       eventCategory: 'OP Holiday Accommodation',
-       eventAction: 'Booking Success',
-       objectId: <ObjMetaNr>,
-       objectName: <name | ''>,
-       objectBookingNumber: <BuchungNr>,
-       objectBookingPrice: <price | ''>,
-       // SECRA-prefixed alias keys (in addition to the generic keys above)
-       secraObjectId: <ObjMetaNr>,
-       secraObjectName: <name | ''>,
-       secraObjectBookingNumber: <BuchungNr>,
-       secraObjectBookingPrice: <price | ''>,
-       secraEventAction: 'OP Event: Buchungsstrecke: submit-success',
-       secraEventCategory: 'Buchungsstrecke:submit-success',
-       secraVendor: 'SECRA OP'
-     }
-   - Required data fields from SECRA OP: `ObjMetaNr`, `BuchungNr`.
-   - Optional fields: `name`, `price`.
+2) Buchung erfolgreich
+- Auslöser: `window.secra_op_client.tracking.booking['submit-success']`
+- Beispiel‑Payload (dataLayer Push):
+```json
+{
+  "event": "secra_op_object_booking",
+  "object_id": "<ObjMetaNr>",
+  "transaction_id": "<BuchungNr>",
+  "currency": "EUR",
+  "content_type": "vacation_rental"
+}
+```
+Optionaler Zusatzparameter (falls Preis vorhanden und numerisch):
 
-How to use
-1) Include the script on pages where SECRA OP widgets run and GTM is present.
-2) Place the script tag right before the closing `</body>` tag to ensure all required globals are available:
+```json
+{
+  "value": 123.45
+}
+```
+- Pflichtfelder: `ObjMetaNr`, `BuchungNr`; optional: `price` (wird als numerischer `value` gesendet, wenn gültig).
 
-   <script src="/path/to/src/op-gtm.js"></script>
+Hinweise:
+- Die Parameter sind bewusst minimal und GA4‑freundlich. Mapping in GTM (Variablen/Tags) erfolgt durch Sie.
 
-3) In Google Tag Manager, create triggers that listen for the custom events `secraOpObjectView` and `secraOpObjectBooking`, and build tags/variables based on the pushed parameters (e.g., `objectId`, `objectBookingNumber`, etc.).
+## Google Analytics 4 (gtag) – src/op-gtag.js
 
-Notes
-- The script waits for `DOMContentLoaded` before binding to `window.secra_op_client.tracking` to avoid race conditions.
-- It performs basic guards and will not push events if required data is missing.
-- External API fields provided by SECRA OP (e.g., ObjMetaNr, BuchungNr) are kept as-is to maintain compatibility.
+Funktion:
+- Registriert die gleichen Hooks und sendet GA4‑Events via `gtag('event', ...)`.
+- Identische Eventnamen und Parameter wie in der GTM‑Variante.
 
-## Vendor-prefixed values
-To make the source explicit and avoid naming collisions in GTM, the payload also includes SECRA-prefixed alias keys alongside the generic keys.
+Gesendete Events und Parameter:
 
-Available alias keys:
-- secraObjectId, secraObjectName, secraObjectBookingNumber, secraObjectBookingPrice
-- secraEventAction, secraEventCategory
-- secraVendor (always 'SECRA OP')
+1) Objektansicht
+- Event: `secra_op_object_view`
+- Parameter:
+```json
+{
+  "object_id": "<ObjMetaNr>",
+  "content_type": "vacation_rental"
+}
+```
 
-Recommendations:
-- For existing GTM setups: you can keep using your current variables and gradually switch to the `secra*` keys if you prefer clearer vendor scoping.
-- For new GTM setups: consider using the `secra*` keys to reduce naming collisions and make the data source explicit.
+2) Buchung erfolgreich
+- Event: `secra_op_object_booking`
+- Parameter:
+```json
+{
+  "object_id": "<ObjMetaNr>",
+  "transaction_id": "<BuchungNr>",
+  "currency": "EUR",
+  "content_type": "vacation_rental"
+}
+```
+Optionaler Zusatzparameter (falls Preis vorhanden und numerisch):
 
+```json
+{
+  "value": 123.45
+}
+```
 
-## GA4 (gtag) integration
-Use this file when you run Google Analytics 4 via the native gtag.js snippet (not via Google Tag Manager).
+### Optionales Debug‑Logging (nur op-gtag.js)
 
-File: `src/op-gtag.js`
+Vor Einbindung von `src/op-gtag.js` kann ein Debug‑Flag gesetzt werden:
 
-What it does
-- Hooks into `window.secra_op_client.tracking` (SECRA OP hooks), same as the GTM variant.
-- Sends GA4 custom events via `gtag('event', <eventName>, <params>)`.
-- Uses the same event names and parameter keys as the GTM script for consistency:
-  - Event names: `secraOpObjectView`, `secraOpObjectBooking`
-  - Parameters: `eventCategory`, `eventAction`, `objectId`, `objectName`, `objectBookingNumber`, `objectBookingPrice`, plus vendor‑prefixed aliases `secra*`.
-- Gracefully no‑ops (warns in console) if `window.gtag` is not present.
+```html
+<script>
+  window.secra_op_client = window.secra_op_client || {};
+  window.secra_op_client.tracking = window.secra_op_client.tracking || {};
+  window.secra_op_client.tracking.debug = true; // Debug aktivieren
+</script>
+<script src="/path/to/src/op-gtag.js"></script>
+```
 
-Prerequisites
-- GA4 base snippet loaded on the page (example):
+- Wenn `debug = true` und `gtag` fehlt oder ein Fehler beim Senden auftritt, erscheinen Warnungen in der Konsole (z. B. "gtag() is not available — event skipped.").
+- Standard ist `debug = false` (keine Konsolenmeldungen).
 
-  <!-- GA4 base tag example -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-XXXXXXX');
-  </script>
+## Kompatibilität & Migration
 
-How to use
-1) Include `src/op-gtag.js` on pages where SECRA OP widgets run and GA4 is present.
-2) Place the script right before the closing `</body>` tag to ensure all required globals are available:
+- Aktuelle Implementierung verwendet snake_case Eventnamen und Parameter:
+  - Events: `secra_op_object_view`, `secra_op_object_booking`
+  - Parameter: `object_id`, `transaction_id`, `currency`, `value` (optional), `content_type`
+- Ältere Dokumentation/Vorversionen enthielten camelCase Events und zusätzliche, vendor‑spezifische Alias‑Keys (`secraObjectId`, `secraEventCategory` etc.). Diese werden nicht mehr gesendet.
+- Passen Sie ggf. GTM Trigger/Variablen und GA4 Berichte auf die obigen, aktuellen Namen an.
 
-   <script src="/path/to/src/op-gtag.js"></script>
+## Hilfe
 
-3) In GA4, you will receive the following events and parameters:
+- SECRA OP stellt die Tracking‑Hooks unter `window.secra_op_client.tracking` bereit.
+- Fragen zu GA4/GTM‑Konfiguration bitte an Ihr Analytics‑Team.
 
-Events sent to GA4
-1) Object view
-   - Triggered when `window.secra_op_client.tracking.object.load` fires.
-   - Event: `secraOpObjectView`
-   - Parameters example:
-     {
-       eventCategory: 'OP Holiday Accommodation',
-       eventAction: 'Object View',
-       objectId: <ObjMetaNr>,
-       // SECRA‑prefixed alias keys
-       secraObjectId: <ObjMetaNr>,
-       secraEventAction: 'OP Event: Objekt: load',
-       secraEventCategory: 'Objekt:load',
-       secraVendor: 'SECRA OP'
-     }
-   - Required data fields from SECRA OP: `ObjMetaNr`.
-
-2) Booking success
-   - Triggered when `window.secra_op_client.tracking.booking['submit-success']` fires.
-   - Event: `secraOpObjectBooking`
-   - Parameters example:
-     {
-       eventCategory: 'OP Holiday Accommodation',
-       eventAction: 'Booking Success',
-       objectId: <ObjMetaNr>,
-       objectName: <name | ''>,
-       objectBookingNumber: <BuchungNr>,
-       objectBookingPrice: <price | ''>,
-       // SECRA‑prefixed alias keys
-       secraObjectId: <ObjMetaNr>,
-       secraObjectName: <name | ''>,
-       secraObjectBookingNumber: <BuchungNr>,
-       secraObjectBookingPrice: <price | ''>,
-       secraEventAction: 'OP Event: Buchungsstrecke: submit-success',
-       secraEventCategory: 'Buchungsstrecke:submit-success',
-       secraVendor: 'SECRA OP'
-     }
-   - Required data fields from SECRA OP: `ObjMetaNr`, `BuchungNr`.
-   - Optional fields: `name`, `price`.
-
-Notes
-- The GA4 and GTM variants emit the same event names and parameters to simplify shared reporting and migration.
-- Keep only one of the scripts active on a given page (either GTM or GA4), otherwise you may double‑track the same interaction.

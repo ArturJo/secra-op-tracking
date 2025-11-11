@@ -1,104 +1,72 @@
 /**
  * SECRA OP Tracking – Google Analytics 4 (gtag) Integration
  * ---------------------------------------------------------
- * This file listens to SECRA OP tracking hooks and forwards events to GA4 via gtag('event', ...).
- * Use this when you load GA4 directly with the gtag.js snippet (not via Google Tag Manager).
+ * Modern GA4 implementation that listens to SECRA OP hooks and sends
+ * GA4-native events via gtag('event', ...). Use this when GA4 is loaded
+ * directly with the gtag.js snippet (not via Google Tag Manager).
  */
 
-(function () {
-    // Ensure the SECRA OP global namespaces exist
-    window.secra_op_client = window.secra_op_client || {};
-    window.secra_op_client.tracking = window.secra_op_client.tracking || {};
-    window.secra_op_client.tracking.search = window.secra_op_client.tracking.search || {};
-    window.secra_op_client.tracking.object = window.secra_op_client.tracking.object || {};
-    window.secra_op_client.tracking.booking = window.secra_op_client.tracking.booking || {};
+// Initialize globals early (no need to wait for DOMContentLoaded)
+window.secra_op_client = window.secra_op_client || {};
+window.secra_op_client.tracking = window.secra_op_client.tracking || {};
+window.secra_op_client.tracking.search = window.secra_op_client.tracking.search || {};
+window.secra_op_client.tracking.object = window.secra_op_client.tracking.object || {};
+window.secra_op_client.tracking.booking = window.secra_op_client.tracking.booking || {};
+// Optional debug flag to control console logging (defaults to false)
+window.secra_op_client.tracking.debug = (typeof window.secra_op_client.tracking.debug === 'boolean')
+    ? window.secra_op_client.tracking.debug
+    : false;
 
-    // Utility: safe gtag call
-    function sendGtagEvent(eventName, params) {
-        if (typeof window.gtag !== 'function') {
-            // GA4 base snippet is not present; avoid throwing. You can replace with your own logging as needed.
-            if (window && window.console && typeof window.console.warn === 'function') {
-                console.warn('[SECRA-OP][gtag] gtag() is not available. Skipping event:', eventName, params);
-            }
-            return;
+// Utility: safe gtag call with graceful fallback
+const sendGtagEvent = (eventName, params) => {
+    const debug = !!(window && window.secra_op_client && window.secra_op_client.tracking && window.secra_op_client.tracking.debug);
+    if (typeof window.gtag !== 'function') {
+        if (debug && window && window.console && typeof window.console.warn === 'function') {
+            console.warn('[SECRA-OP][gtag] gtag() is not available — event skipped.\nHinweis/Note: Laden Sie das GA4 gtag-Snippet oder schalten Sie Debug aus. Event:', eventName, params);
         }
-        try {
-            window.gtag('event', eventName, params || {});
-        } catch (e) {
-            if (window && window.console && typeof window.console.error === 'function') {
-                console.error('[SECRA-OP][gtag] Failed to send event', eventName, e);
-            }
+        return;
+    }
+    try {
+        window.gtag('event', eventName, params || {});
+    } catch (e) {
+        if (debug && window && window.console && typeof window.console.warn === 'function') {
+            console.warn('[SECRA-OP][gtag] Failed to send event (non-fatal diagnostic)', eventName, e);
         }
     }
+};
 
-    // Wait until the DOM is fully loaded before registering event handlers
-    document.addEventListener('DOMContentLoaded', function () {
-        // Object view event (holiday accommodation)
-        var sendObjectView = function (mod, event, data) {
-            if (!data || !data.ObjMetaNr) {
-                return;
-            }
-            var params = {
-                // GA4-Parameter
-                event_category: 'OP Holiday Accommodation',
-                event_action: 'Object View',
-                item_id: data.ObjMetaNr,
-                item_category: 'OP Holiday Accommodation',
-                content_type: 'vacation_rental',
-                // Generic keys
-                eventCategory: 'OP Holiday Accommodation',
-                eventAction: 'Object View',
-                objectId: data.ObjMetaNr,
-                // SECRA aliases for clarity
-                secraObjectId: data.ObjMetaNr,
-                secraEventAction: 'OP Event: Objekt: load',
-                secraEventCategory: 'Objekt:load',
-                secraVendor: 'SECRA OP'
-            };
-            sendGtagEvent('secraOpObjectView', params);
-        };
+// Custom event: object view (holiday accommodation)
+const sendObjectView = (mod, event, data) => {
+    if (!data || !data.ObjMetaNr) return;
 
-        // Booking success event (holiday accommodation)
-        var sendBookingSuccess = function (mod, event, data) {
-            if (!data || !data.ObjMetaNr || !data.BuchungNr) {
-                return;
-            }
-            var params = {
-                // GA4-Parameter
-                event_category: 'OP Holiday Accommodation',
-                event_action: 'Booking Success',
-                transaction_id: data.BuchungNr,
-                value: parseFloat(data.price) || 0,
-                currency: 'EUR',
-                content_type: 'vacation_rental',
-                item_id: data.ObjMetaNr,
-                item_category: 'OP Holiday Accommodation',
-                // Generic keys
-                eventCategory: 'OP Holiday Accommodation',
-                eventAction: 'Booking Success',
-                objectId: data.ObjMetaNr,
-                objectName: data.name || '',
-                objectBookingNumber: data.BuchungNr,
-                objectBookingPrice: data.price || '',
-                // SECRA aliases for clarity
-                secraObjectId: data.ObjMetaNr,
-                secraObjectName: data.name || '',
-                secraObjectBookingNumber: data.BuchungNr,
-                secraObjectBookingPrice: data.price || '',
-                secraEventAction: 'OP Event: Buchungsstrecke: submit-success',
-                secraEventCategory: 'Buchungsstrecke:submit-success',
-                secraVendor: 'SECRA OP'
-            };
-            sendGtagEvent('secraOpObjectBooking', params);
-        };
+    const params = {
+        object_id: String(data.ObjMetaNr),
+        content_type: 'vacation_rental'
+    };
 
-        // Register handlers with the SECRA OP client tracking hooks
-        var initEvents = function () {
-            window.secra_op_client.tracking.object.load = sendObjectView;
-            window.secra_op_client.tracking.booking['submit-success'] = sendBookingSuccess;
-        };
+    sendGtagEvent('secra_op_object_view', params);
+};
 
-        initEvents();
-    });
+// Custom event: booking success (holiday accommodation)
+const sendBookingSuccess = (mod, event, data) => {
+    if (!data || !data.ObjMetaNr || !data.BuchungNr) return;
+
+    const value = parseFloat(data.price);
+    const params = {
+        object_id: String(data.ObjMetaNr),
+        transaction_id: String(data.BuchungNr),
+        currency: 'EUR',
+        content_type: 'vacation_rental'
+    };
+    if (Number.isFinite(value)) {
+        params.value = value; // numeric only when valid
+    }
+
+    sendGtagEvent('secra_op_object_booking', params);
+};
+
+// Register handlers with the SECRA OP client tracking hooks immediately
+(function initEvents() {
+    window.secra_op_client.tracking.object.load = sendObjectView;
+    window.secra_op_client.tracking.booking['submit-success'] = sendBookingSuccess;
 })();
-l
