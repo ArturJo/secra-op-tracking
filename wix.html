@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Nur ein Test für eine WIX Seite</title>
+</head>
+<body>
+
+...
+
+<div id="op_content_box" style="max-width: 90%; margin: 0 auto;">
+    <script type="text/javascript">
+        // Diese Werte können/müssen angepasst werden:
+        var loadOptions = {
+            module: 'op-frontend-suche',
+            // Name des zu ladenden Moduls
+            content_id: 'op_content_box',
+            // ID des HTML Elements, in das der Inhalt geladen wird
+            options: {
+                hasOwnCookieInfo: false,
+                alwaysShowExtendedFilters: true,
+                enableShare: true,
+                scrollToTop: false,
+                limit: {
+                    GaGeNr: [29735]
+                }
+            }
+        };
+
+        function loadSecraModule() {
+            if (window.secra_op_client && window.secra_op_client.loadModule) {
+                console.log("SECRA-Modul wird geladen...");
+                window.secra_op_client.loadModule(loadOptions['module'], loadOptions['content_id'], loadOptions['options']);
+            } else {
+                console.log("SECRA-Modul noch nicht verfügbar. In Warteschlange einfügen...");
+                if (!window.secra_op_client) {
+                    window.secra_op_client = {};
+                }
+                window.secra_op_client.loadQueue = window.secra_op_client.loadQueue || [];
+                window.secra_op_client.loadQueue.push({
+                    module: loadOptions['module'],
+                    embed_id: loadOptions['content_id'],
+                    options: loadOptions['options']
+                });
+            }
+        }
+
+        // Skript mit 2 Sekunden Verzögerung ausführen, um sicherzustellen, dass SECRA geladen ist
+        setTimeout(loadSecraModule, 2000);
+    </script>
+</div>
+<script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    var secra_op_client = window.secra_op_client || {};
+    secra_op_client.tracking = secra_op_client.tracking || {};
+    secra_op_client.tracking.search = secra_op_client.tracking.search || {};
+    secra_op_client.tracking.object = secra_op_client.tracking.object || {};
+    secra_op_client.tracking.booking = secra_op_client.tracking.booking || {};
+    document.addEventListener('DOMContentLoaded', function () {
+        var sendObjektaufrufFerienunterkunft = function (mod, event, data) {
+            if (!data || !data.ObjMetaNr) {
+                return;
+            }
+            dataLayer.push({
+                event: 'objectView',
+                eventCategory: 'OP Ferienunterkunft',
+                eventAction: 'Objektaufruf Ferienunterkunft',
+                objectId: data.ObjMetaNr
+            });
+            var sendBuchungFerienunterkunft = function (mod, event, data) {
+                if (!data || !data.ObjMetaNr || !data.BuchungNr) {
+                }
+                ;
+                return;
+            }
+            dataLayer.push({
+                event: 'objectBooking',
+                eventCategory: 'OP Ferienunterkunft',
+                eventAction: 'Buchung Ferienunterkunft',
+                objectId: data.ObjMetaNr,
+                objectName: data.name || '',
+                objectBookingNumber: data.BuchungNr,
+                objectBookingPrice: data.price || ''
+            });
+            var initEvents = function () {
+                secra_op_client.tracking.object.load = sendObjektaufrufFerienunterkunft;
+                secra_op_client.tracking.booking['submit-success'] = sendBuchungFerienunterkunft;
+            };
+        };
+        initEvents();
+    });
+</script>
+
+
+...
+
+</body>
+</html>
