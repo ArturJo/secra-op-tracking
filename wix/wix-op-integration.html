@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Nur ein Test für eine WIX Seite</title>
+
+    <!-- MANDATORY: Replace 'xxxxxxxxx' with your actual secratoid -->
+    <script async type="text/javascript"
+            src="https://www.optimale-praesentation.de/frontend/js/bin/boot?secratoid=xxxxxxxxx"></script>
+</head>
+<body>
+
+<!-- Custom content BEFORE SECRA widget (e.g., navigation, hero section) -->
+
+<div id="op_content_box">
+    <script type="text/javascript">
+        var loadOptions = {
+            module: 'op-frontend-suche',
+            content_id: 'op_content_box',
+            options: {
+                hasOwnCookieInfo: false,
+                alwaysShowExtendedFilters: true,
+                enableShare: true,
+                scrollToTop: false,
+                // limit: {GaGeNr: [...]}
+            }
+        };
+
+        function loadSecraModule() {
+            if (window.secra_op_client && window.secra_op_client.loadModule) {
+                console.log("SECRA-Modul wird geladen...");
+                window.secra_op_client.loadModule(
+                    loadOptions['module'],
+                    loadOptions['content_id'],
+                    loadOptions['options']
+                );
+            } else {
+                console.log("SECRA-Modul noch nicht verfügbar. In Warteschlange einfügen...");
+                if (!window.secra_op_client) {
+                    window.secra_op_client = {};
+                }
+                window.secra_op_client.loadQueue = window.secra_op_client.loadQueue || [];
+                window.secra_op_client.loadQueue.push({
+                    module: loadOptions['module'],
+                    embed_id: loadOptions['content_id'],
+                    options: loadOptions['options']
+                });
+            }
+        }
+
+        setTimeout(loadSecraModule, 2000);
+    </script>
+</div>
+<!-- Custom content AFTER SECRA widget (e.g., footer, additional sections) -->
+
+</body>
+</html>
