@@ -4,8 +4,8 @@
  * Pushes minimal, GA4-friendly custom events into the GTM dataLayer.
  * GTM should map these parameters to your GA4 tags as needed.
  *
- * @version v2.1.0-1-geb62922
- * @buildDate 2026-02-04 13:22:20 UTC
+ * @version v2.1.0-2-g4d06beb
+ * @buildDate 2026-02-04 13:23:44 UTC
  */
 
 // Initialize globals early (no need to wait for DOMContentLoaded)

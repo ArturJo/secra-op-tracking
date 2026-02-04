@@ -5,8 +5,8 @@
  * GA4-native events via gtag('event', ...). Use this when GA4 is loaded
  * directly with the gtag.js snippet (not via Google Tag Manager).
  *
- * @version v2.1.0-1-geb62922
- * @buildDate 2026-02-04 13:22:20 UTC
+ * @version v2.1.0-2-g4d06beb
+ * @buildDate 2026-02-04 13:23:44 UTC
  */
 
 // Initialize globals early (no need to wait for DOMContentLoaded)
