@@ -101,17 +101,12 @@ Gesendete Events und Payloads:
   "object_id": "<ObjMetaNr>",
   "transaction_id": "<BuchungNr>",
   "currency": "EUR",
-  "content_type": "vacation_rental"
-}
-```
-Optionaler Zusatzparameter (falls Preis vorhanden und numerisch):
-
-```json
-{
+  "content_type": "vacation_rental",
   "value": 123.45
 }
 ```
-- Pflichtfelder: `ObjMetaNr`, `BuchungNr`; optional: `price` (wird als numerischer `value` gesendet, wenn gültig).
+- Pflichtfelder: `ObjMetaNr`, `BuchungNr`
+- `value`: Wird immer gesendet. Bei fehlendem/ungültigem Preis wird `0` verwendet (Fallback).
 
 Hinweise:
 - Die Parameter sind bewusst minimal und GA4‑freundlich. Mapping in GTM (Variablen/Tags) erfolgt durch Sie.
@@ -142,16 +137,12 @@ Gesendete Events und Parameter:
   "object_id": "<ObjMetaNr>",
   "transaction_id": "<BuchungNr>",
   "currency": "EUR",
-  "content_type": "vacation_rental"
-}
-```
-Optionaler Zusatzparameter (falls Preis vorhanden und numerisch):
-
-```json
-{
+  "content_type": "vacation_rental",
   "value": 123.45
 }
 ```
+- `value` wird immer gesendet (Fallback: `0` bei fehlendem/ungültigem Preis)
+- Bei aktiviertem Debug-Modus (`window.secra_op_client.tracking.debug = true`) erscheint eine Konsolen-Warnung, wenn der Preis fehlt oder ungültig ist
 
 ### Optionales Debug‑Logging (nur op-gtag.js)
 

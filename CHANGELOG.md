@@ -5,6 +5,23 @@ All notable changes to the SECRA OP Tracking scripts will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-02-04
+
+### Changed
+- Improved documentation for `value` parameter - now explicitly documented as always present (Fallback: `0`)
+- Updated all markdown documentation files for consistency with current implementation
+
+### Added
+- Comprehensive CHANGELOG.md with full version history and migration guide
+- Updated RELEASE-NOTES.md with detailed breaking changes documentation
+- Enhanced README.md with clearer `value` parameter documentation
+
+### Fixed
+- Documentation now accurately reflects that `value` is always sent (not optional)
+- Updated experimental WIX documentation with current event names and deprecation warnings
+
+---
+
 ## [2.0.0] - 2026-02-04
 
 ### Changed

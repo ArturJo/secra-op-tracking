@@ -55,33 +55,61 @@ setTimeout(loadSecraModule, 2000);
 
 ## Tracking-Events
 
+⚠️ **Hinweis**: Die nachfolgenden Beispiele verwenden veraltete Event-Namen. Für aktuelle Implementierungen siehe `src/op-gtm.js` oder `src/op-gtag.js`.
+
 Das Tracking registriert folgende Event-Handler:
 
-### Objektaufruf
+### Objektaufruf (Beispiel - veraltet)
 ```javascript
 secra_op_client.tracking.object.load = function (mod, event, data) {
     dataLayer.push({
-        event: 'objectView',
-        eventCategory: 'OP Ferienunterkunft',
-        eventAction: 'Objektaufruf Ferienunterkunft',
-        objectId: data.ObjMetaNr
+        event: 'secra_op_object_view',  // Aktueller Standard
+        object_id: String(data.ObjMetaNr),
+        content_type: 'vacation_rental'
     });
 }
 ```
 
-### Buchung
+Veraltete Variante (WIX):
+```javascript
+// VERALTET - nur als Referenz
+dataLayer.push({
+    event: 'objectView',
+    eventCategory: 'OP Ferienunterkunft',
+    eventAction: 'Objektaufruf Ferienunterkunft',
+    objectId: data.ObjMetaNr
+});
+```
+
+### Buchung (Beispiel - aktualisiert)
 ```javascript
 secra_op_client.tracking.booking['submit-success'] = function (mod, event, data) {
+    const parsedValue = parseFloat(data.price);
+    const finalValue = Number.isFinite(parsedValue) ? parsedValue : 0;
+
     dataLayer.push({
-        event: 'objectBooking',
-        eventCategory: 'OP Ferienunterkunft',
-        eventAction: 'Buchung Ferienunterkunft',
-        objectId: data.ObjMetaNr,
-        objectName: data.name || '',
-        objectBookingNumber: data.BuchungNr,
-        objectBookingPrice: data.price || ''
+        event: 'secra_op_object_booking',  // Aktueller Standard
+        object_id: String(data.ObjMetaNr),
+        transaction_id: String(data.BuchungNr),
+        value: finalValue,
+        currency: 'EUR',
+        content_type: 'vacation_rental'
     });
 }
+```
+
+Veraltete Variante (WIX):
+```javascript
+// VERALTET - nur als Referenz
+dataLayer.push({
+    event: 'objectBooking',
+    eventCategory: 'OP Ferienunterkunft',
+    eventAction: 'Buchung Ferienunterkunft',
+    objectId: data.ObjMetaNr,
+    objectName: data.name || '',
+    objectBookingNumber: data.BuchungNr,
+    objectBookingPrice: data.price || ''
+});
 ```
 
 ## Konfiguration
