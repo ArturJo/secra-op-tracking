@@ -1,23 +1,38 @@
 # Release Notes – SECRA OP Tracking
 
-Version: v2.1.0
+Version: v2.1.1
 Datum: 2026-02-04
 
-Empfohlener GitHub Release‑Titel: SECRA OP Tracking v2.1.0 – Documentation Update
+Empfohlener GitHub Release‑Titel: SECRA OP Tracking v2.1.1 – Build Automation & Version Tracking
 
-Diese Version bringt wichtige Dokumentationsverbesserungen und stellt sicher, dass alle Anleitungen konsistent mit der aktuellen Implementierung sind.
+Diese Version führt automatisierte Versionierung ein und bietet produktionsfertige Build-Artefakte.
 
-## Highlights v2.1.0
+## Highlights v2.1.1
+- **Automatische Versionierung**: Build-Script injiziert Git-Tag-Version in finale Dateien
+- **Version Tracking**: Jede Datei enthält `@version` und `@buildDate` im Header-Kommentar
+- **Production-Ready Files**: `dist/` Ordner mit versionierten, einsatzbereiten Dateien
+- **Deployment-freundlich**: Einfache Identifikation der verwendeten Version auf Kundenseiten
+
+## Was ist neu in v2.1.1?
+- Build-Script `build.sh` für automatisierte Versionierung
+- Version und Build-Datum werden aus Git-Tags extrahiert und in Dateien eingebettet
+- `dist/op-gtag.js` und `dist/op-gtm.js` enthalten Version-Metadaten
+- Source-Dateien (`src/`) mit Platzhaltern für Build-Prozess
+
+## Build-Prozess
+```bash
+./build.sh  # Erzeugt dist/op-gtag.js und dist/op-gtm.js mit aktueller Version
+```
+
+---
+
+## Vorherige Version: v2.1.0
+
+### Highlights v2.1.0
 - **Vollständige Dokumentation**: Alle Markdown-Dateien auf dem neuesten Stand
 - **CHANGELOG.md**: Vollständige Versionshistorie mit Migration Guide
 - **Klarere `value`-Dokumentation**: Explizit als "immer vorhanden" dokumentiert
 - **Aktualisierte WIX-Docs**: Veraltete Eventnamen als deprecated markiert
-
-## Was ist neu in v2.1.0?
-- Verbesserte Dokumentation des `value`-Parameters (immer gesendet, Fallback: `0`)
-- Alle MD-Dateien auf Konsistenz geprüft und aktualisiert
-- CHANGELOG.md mit vollständiger Versionshistorie hinzugefügt
-- WIX-Experimentaldokumentation mit aktuellen Event-Namen aktualisiert
 
 ---
 

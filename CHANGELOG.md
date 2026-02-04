@@ -5,6 +5,19 @@ All notable changes to the SECRA OP Tracking scripts will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2026-02-04
+
+### Added
+- Automated version injection via build script (`build.sh`)
+- Version and build date now embedded in compiled files (`dist/op-gtag.js`, `dist/op-gtm.js`)
+- Production-ready files available in `dist/` directory with version metadata
+
+### Changed
+- Build process now injects git tag version into JavaScript files
+- Source files (`src/`) now contain version placeholders for automated builds
+
+---
+
 ## [2.1.0] - 2026-02-04
 
 ### Changed
