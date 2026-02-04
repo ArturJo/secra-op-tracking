@@ -51,16 +51,22 @@ const sendObjectView = (mod, event, data) => {
 const sendBookingSuccess = (mod, event, data) => {
     if (!data || !data.ObjMetaNr || !data.BuchungNr) return;
 
-    const value = parseFloat(data.price);
+    // Parse and validate price with fallback
+    const parsedValue = parseFloat(data.price);
+    const finalValue = Number.isFinite(parsedValue) ? parsedValue : 0;
+
+    // Debug warning if price is missing or invalid
+    if (finalValue === 0 && window.secra_op_client.tracking.debug) {
+        console.warn('[SECRA-OP] Booking ohne gültigen Preis:', data);
+    }
+
     const params = {
         object_id: String(data.ObjMetaNr),
         transaction_id: String(data.BuchungNr),
+        value: finalValue,
         currency: 'EUR',
         content_type: 'vacation_rental'
     };
-    if (Number.isFinite(value)) {
-        params.value = value; // numeric only when valid
-    }
 
     sendGtagEvent('secra_op_object_booking', params);
 };
