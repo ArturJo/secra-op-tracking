@@ -76,6 +76,19 @@ const sendBookingSuccess = (mod, event, data) => {
     };
 
     sendGtagEvent('secra_op_object_booking', params);
+
+    // Standard GA4 purchase event — populates "Gesamtumsatz" in GA4 reports
+    sendGtagEvent('purchase', {
+        transaction_id: String(data.BuchungNr),
+        value: finalValue,
+        currency: 'EUR',
+        items: [{
+            item_id: String(data.ObjMetaNr),
+            item_name: data.name || String(data.ObjMetaNr),
+            price: finalValue,
+            quantity: 1
+        }]
+    });
 };
 
 // Register handlers with the SECRA OP client tracking hooks immediately

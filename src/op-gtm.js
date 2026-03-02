@@ -50,6 +50,22 @@ var sendBookingSuccess = function (mod, event, data) {
         dl.value = value; // numeric only when valid
     }
     window.dataLayer.push(dl);
+
+    // Standard GA4 purchase event — populates "Gesamtumsatz" in GA4 reports
+    if (Number.isFinite(value)) {
+        window.dataLayer.push({
+            event: 'purchase',
+            transaction_id: String(data.BuchungNr),
+            value: value,
+            currency: 'EUR',
+            items: [{
+                item_id: String(data.ObjMetaNr),
+                item_name: data.name || String(data.ObjMetaNr),
+                price: value,
+                quantity: 1
+            }]
+        });
+    }
 };
 
 // Register handlers with the SECRA OP client tracking hooks immediately
