@@ -4,11 +4,14 @@
 
 set -e
 
-# Get version: use first argument if provided, otherwise fall back to git tag
+# Get version: use first argument if provided, otherwise read from VERSION file
 if [ -n "$1" ]; then
     VERSION="$1"
+elif [ -f VERSION ]; then
+    VERSION=$(cat VERSION | tr -d '[:space:]')
 else
-    VERSION=$(git describe --tags --always 2>/dev/null || echo "dev")
+    echo "Error: No version argument given and no VERSION file found." >&2
+    exit 1
 fi
 BUILD_DATE=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
 
