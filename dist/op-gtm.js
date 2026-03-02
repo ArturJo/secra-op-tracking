@@ -4,8 +4,8 @@
  * Pushes minimal, GA4-friendly custom events into the GTM dataLayer.
  * GTM should map these parameters to your GA4 tags as needed.
  *
- * @version v2.1.1
- * @buildDate 2026-02-04 13:29:01 UTC
+ * @version v2.1.2
+ * @buildDate 2026-03-02 11:32:58 UTC
  */
 
 // Initialize globals early (no need to wait for DOMContentLoaded)
@@ -34,7 +34,11 @@ var sendBookingSuccess = function (mod, event, data) {
     if (!data || !data.ObjMetaNr || !data.BuchungNr) {
         return;
     }
-    var value = parseFloat(data.price);
+    // Parse German-formatted price string (e.g. "1.234,56 €" → 1234.56)
+    var rawPrice = typeof data.price === 'string'
+        ? data.price.replace(/[^\d,.]/g, '').replace(/\./g, '').replace(',', '.')
+        : data.price;
+    var value = parseFloat(rawPrice);
     var dl = {
         event: 'secra_op_object_booking',
         object_id: String(data.ObjMetaNr),

@@ -5,8 +5,8 @@
  * GA4-native events via gtag('event', ...). Use this when GA4 is loaded
  * directly with the gtag.js snippet (not via Google Tag Manager).
  *
- * @version v2.1.1
- * @buildDate 2026-02-04 13:29:01 UTC
+ * @version v2.1.2
+ * @buildDate 2026-03-02 11:32:58 UTC
  */
 
 // Initialize globals early (no need to wait for DOMContentLoaded)
@@ -54,8 +54,12 @@ const sendObjectView = (mod, event, data) => {
 const sendBookingSuccess = (mod, event, data) => {
     if (!data || !data.ObjMetaNr || !data.BuchungNr) return;
 
-    // Parse and validate price with fallback
-    const parsedValue = parseFloat(data.price);
+    // Parse German-formatted price string (e.g. "1.234,56 €" → 1234.56)
+    // OP delivers price as a localized display string: thousand-sep='.', decimal-sep=','
+    const rawPrice = typeof data.price === 'string'
+        ? data.price.replace(/[^\d,.]/g, '').replace(/\./g, '').replace(',', '.')
+        : data.price;
+    const parsedValue = parseFloat(rawPrice);
     const finalValue = Number.isFinite(parsedValue) ? parsedValue : 0;
 
     // Debug warning if price is missing or invalid
