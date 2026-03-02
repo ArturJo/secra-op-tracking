@@ -5,8 +5,8 @@
  * GA4-native events via gtag('event', ...). Use this when GA4 is loaded
  * directly with the gtag.js snippet (not via Google Tag Manager).
  *
- * @version v2.1.5
- * @buildDate 2026-03-02 12:02:11 UTC
+ * @version v2.1.6
+ * @buildDate 2026-03-02 12:23:56 UTC
  */
 
 // Initialize globals early (no need to wait for DOMContentLoaded)
@@ -76,6 +76,19 @@ const sendBookingSuccess = (mod, event, data) => {
     };
 
     sendGtagEvent('secra_op_object_booking', params);
+
+    // Standard GA4 purchase event — populates "Gesamtumsatz" in GA4 reports
+    sendGtagEvent('purchase', {
+        transaction_id: String(data.BuchungNr),
+        value: finalValue,
+        currency: 'EUR',
+        items: [{
+            item_id: String(data.ObjMetaNr),
+            item_name: data.name || String(data.ObjMetaNr),
+            price: finalValue,
+            quantity: 1
+        }]
+    });
 };
 
 // Register handlers with the SECRA OP client tracking hooks immediately

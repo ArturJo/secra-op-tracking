@@ -4,8 +4,8 @@
  * Pushes minimal, GA4-friendly custom events into the GTM dataLayer.
  * GTM should map these parameters to your GA4 tags as needed.
  *
- * @version v2.1.5
- * @buildDate 2026-03-02 12:02:11 UTC
+ * @version v2.1.6
+ * @buildDate 2026-03-02 12:23:56 UTC
  */
 
 // Initialize globals early (no need to wait for DOMContentLoaded)
@@ -50,6 +50,22 @@ var sendBookingSuccess = function (mod, event, data) {
         dl.value = value; // numeric only when valid
     }
     window.dataLayer.push(dl);
+
+    // Standard GA4 purchase event — populates "Gesamtumsatz" in GA4 reports
+    if (Number.isFinite(value)) {
+        window.dataLayer.push({
+            event: 'purchase',
+            transaction_id: String(data.BuchungNr),
+            value: value,
+            currency: 'EUR',
+            items: [{
+                item_id: String(data.ObjMetaNr),
+                item_name: data.name || String(data.ObjMetaNr),
+                price: value,
+                quantity: 1
+            }]
+        });
+    }
 };
 
 // Register handlers with the SECRA OP client tracking hooks immediately
