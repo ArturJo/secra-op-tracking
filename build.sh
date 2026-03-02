@@ -4,8 +4,12 @@
 
 set -e
 
-# Get version from git (tag or commit hash)
-VERSION=$(git describe --tags --always 2>/dev/null || echo "dev")
+# Get version: use first argument if provided, otherwise fall back to git tag
+if [ -n "$1" ]; then
+    VERSION="$1"
+else
+    VERSION=$(git describe --tags --always 2>/dev/null || echo "dev")
+fi
 BUILD_DATE=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
 
 echo "Building SECRA OP Tracking v${VERSION}"
