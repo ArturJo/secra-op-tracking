@@ -7,6 +7,8 @@ Dateien:
 - src/op-gtag.js (GA4 / gtag)
 - GTM-Events-Anleitung.md (Schritt-für-Schritt-Anleitung für GTM Events und Conversions)
 - GA4-gtag-Anleitung.md (Schritt-für-Schritt-Anleitung für direkte GA4/gtag Einrichtung)
+- VERSION (aktuelle Versionsnummer für den Build-Prozess)
+- build.sh (Build-Script: kopiert src/ nach dist/ und setzt Version + Build-Datum)
 
 Wichtig:
 - Pro Seite nur eine Variante verwenden (GTM oder GA4). Beide gleichzeitig führt zu Doppeltracking.
@@ -94,7 +96,9 @@ Gesendete Events und Payloads:
 
 2) Buchung erfolgreich
 - Auslöser: `window.secra_op_client.tracking.booking['submit-success']`
-- Beispiel‑Payload (dataLayer Push):
+- Es werden zwei Events gefeuert:
+
+a) Custom Event (unverändert):
 ```json
 {
   "event": "secra_op_object_booking",
@@ -105,8 +109,25 @@ Gesendete Events und Payloads:
   "value": 123.45
 }
 ```
+
+b) Standard GA4 Purchase Event (neu – befüllt "Gesamtumsatz" in GA4):
+```json
+{
+  "event": "purchase",
+  "transaction_id": "<BuchungNr>",
+  "value": 123.45,
+  "currency": "EUR",
+  "items": [{
+    "item_id": "<ObjMetaNr>",
+    "item_name": "<name>",
+    "price": 123.45,
+    "quantity": 1
+  }]
+}
+```
 - Pflichtfelder: `ObjMetaNr`, `BuchungNr`
-- `value`: Wird immer gesendet. Bei fehlendem/ungültigem Preis wird `0` verwendet (Fallback).
+- `value`: Wird aus `data.price` geparst. OP liefert einen deutschen Anzeigestring (z. B. `"1.234,56 €"`), der automatisch zu `1234.56` normalisiert wird.
+- Bei ungültigem/fehlendem Preis: `secra_op_object_booking` sendet `value: 0`; `purchase` wird in der GTM-Variante nur bei gültigem Preis gesendet.
 
 Hinweise:
 - Die Parameter sind bewusst minimal und GA4‑freundlich. Mapping in GTM (Variablen/Tags) erfolgt durch Sie.
@@ -130,8 +151,9 @@ Gesendete Events und Parameter:
 ```
 
 2) Buchung erfolgreich
-- Event: `secra_op_object_booking`
-- Parameter:
+- Es werden zwei Events gefeuert:
+
+a) Custom Event: `secra_op_object_booking`
 ```json
 {
   "object_id": "<ObjMetaNr>",
@@ -141,7 +163,23 @@ Gesendete Events und Parameter:
   "value": 123.45
 }
 ```
-- `value` wird immer gesendet (Fallback: `0` bei fehlendem/ungültigem Preis)
+
+b) Standard GA4 Event: `purchase` (befüllt "Gesamtumsatz" in GA4-Berichten)
+```json
+{
+  "transaction_id": "<BuchungNr>",
+  "value": 123.45,
+  "currency": "EUR",
+  "items": [{
+    "item_id": "<ObjMetaNr>",
+    "item_name": "<name>",
+    "price": 123.45,
+    "quantity": 1
+  }]
+}
+```
+- `value` wird aus dem deutschen Preisstring der OP-API normalisiert (z. B. `"1.234,56 €"` → `1234.56`)
+- Fallback `value: 0` bei fehlendem/ungültigem Preis (nur `secra_op_object_booking`; `purchase` wird in der GTM-Variante bei Preis `0` nicht gefeuert)
 - Bei aktiviertem Debug-Modus (`window.secra_op_client.tracking.debug = true`) erscheint eine Konsolen-Warnung, wenn der Preis fehlt oder ungültig ist
 
 ### Optionales Debug‑Logging (nur op-gtag.js)
@@ -163,8 +201,8 @@ Vor Einbindung von `src/op-gtag.js` kann ein Debug‑Flag gesetzt werden:
 ## Kompatibilität & Migration
 
 - Aktuelle Implementierung verwendet snake_case Eventnamen und Parameter:
-  - Events: `secra_op_object_view`, `secra_op_object_booking`
-  - Parameter: `object_id`, `transaction_id`, `currency`, `value` (optional), `content_type`
+  - Events: `secra_op_object_view`, `secra_op_object_booking`, `purchase`
+  - Parameter: `object_id`, `transaction_id`, `currency`, `value`, `content_type`, `items[]` (nur bei `purchase`)
 - Ältere Dokumentation/Vorversionen enthielten camelCase Events und zusätzliche, vendor‑spezifische Alias‑Keys (`secraObjectId`, `secraEventCategory` etc.). Diese werden nicht mehr gesendet.
 - Passen Sie ggf. GTM Trigger/Variablen und GA4 Berichte auf die obigen, aktuellen Namen an.
 

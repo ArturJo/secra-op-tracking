@@ -25,13 +25,25 @@ Das Skript src/op-gtm.js pusht folgende Custom Events in den dataLayer:
   - content_type: "vacation_rental"
 
 2) Buchung erfolgreich
-- Event-Name: secra_op_object_booking
+- Es werden zwei dataLayer Pushes ausgeführt:
+
+a) Custom Event: secra_op_object_booking
 - Payload:
   - object_id: String
   - transaction_id: String
   - currency: "EUR"
   - content_type: "vacation_rental"
-  - value: Number (optional, nur wenn Preis numerisch vorliegt)
+  - value: Number (nur wenn Preis gültig)
+
+b) Standard GA4 Event: purchase (neu – befüllt "Gesamtumsatz" in GA4)
+- Wird nur gefeuert wenn value gültig (> 0)
+- Payload:
+  - transaction_id: String
+  - value: Number
+  - currency: "EUR"
+  - items: Array mit einem Eintrag (item_id, item_name, price, quantity)
+
+Hinweis: `data.price` der OP-API ist ein deutscher Anzeigestring (z. B. `"1.234,56 €"`). Das Skript normalisiert diesen automatisch zu einem numerischen Wert (z. B. `1234.56`).
 
 Diese Namen/Parameter sind absichtlich minimal und GA4-freundlich.
 
@@ -59,6 +71,11 @@ Legen Sie zwei Custom Event Trigger an:
 - Trigger: CE – secra_op_object_booking
   - Typ: Benutzerdefiniertes Ereignis (Custom Event)
   - Event-Name: secra_op_object_booking
+  - Übereinstimmung: Genau passend
+
+- Trigger: CE – purchase
+  - Typ: Benutzerdefiniertes Ereignis (Custom Event)
+  - Event-Name: purchase
   - Übereinstimmung: Genau passend
 
 ## 5) GA4 Konfiguration in GTM (falls noch nicht vorhanden)
@@ -93,7 +110,20 @@ Legen Sie zwei Custom Event Trigger an:
     - value → {{dlv.value}} (optional; wird gesendet, wenn vorhanden)
   - Auslöser: CE – secra_op_object_booking
 
-Hinweis: In GA4 können Sie später diese Ereignisnamen als Conversions markieren (siehe Abschnitt 7).
+3) GA4 Event: purchase (befüllt "Gesamtumsatz" in GA4-Berichten)
+- Tag: GA4 – Event – purchase
+  - Typ: Google Analytics: GA4-Ereignis
+  - Konfigurations-Tag: GA4 – Konfig (oder Mess-ID direkt eintragen)
+  - Ereignisname: purchase
+  - Ereignisparameter:
+    - transaction_id → {{dlv.transaction_id}}
+    - value → {{dlv.value}}
+    - currency → {{dlv.currency}}
+    - items → {{dlv.items}}
+  - Auslöser: CE – purchase
+
+Hinweis: Für `items` eine Data Layer-Variable anlegen (Name: dlv.items, Data Layer Variable Name: items, Version: 2).
+In GA4 können Sie diese Ereignisnamen als Conversions markieren (siehe Abschnitt 7).
 
 ## 7) Conversions in GA4 markieren (empfohlen)
 
@@ -137,7 +167,7 @@ Schritte in GTM:
 
 - Nicht beide Skripte nutzen: op-gtm.js (GTM) ODER op-gtag.js (gtag). Doppeltracking vermeiden.
 - SPA/Widget-Navigation: Die hier verwendeten Hooks werden durch SECRA OP ausgelöst. Zusätzliche Pageview-Logik ist i. d. R. nicht notwendig.
-- Numerische Werte: value wird nur gesendet, wenn im dataLayer numerisch. Stellen Sie sicher, dass Preise als Zahl vorliegen.
+- Preisformat: OP liefert `price` als deutschen Anzeigestring (z. B. `"1.234,56 €"`). Das Skript parst diesen automatisch. Kein manueller Eingriff nötig.
 - Consent Mode (optional): Falls Sie Consent Mode nutzen, konfigurieren Sie ihn vor dem Laden des GTM Containers und berücksichtigen Sie die Consent-Einstellungen in Ihren Tags/Triggern.
 - Versionsverwaltung: Änderungen im GTM Container stets als Version veröffentlichen.
 
@@ -148,8 +178,9 @@ Schritte in GTM:
 
 ## 11) Kurzübersicht: Was ist nach dieser Anleitung eingerichtet?
 
-- 2 Custom Events aus SECRA OP werden per GTM an GA4 gesendet.
-- secra_op_object_booking kann als Conversion in GA4 markiert oder an Google Ads gemeldet werden.
+- 3 Events werden per GTM an GA4 gesendet: `secra_op_object_view`, `secra_op_object_booking`, `purchase`.
+- `purchase` befüllt automatisch die Spalte "Gesamtumsatz" in GA4 → Engagement → Ereignisse.
+- `secra_op_object_booking` kann zusätzlich als Conversion in GA4 markiert oder an Google Ads gemeldet werden.
 - Saubere Trennung zwischen Datenerhebung (Events) und Zieldetektion (Conversions).
 
 

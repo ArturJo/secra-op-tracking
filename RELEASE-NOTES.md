@@ -1,32 +1,36 @@
 # Release Notes – SECRA OP Tracking
 
-Version: v2.1.1
-Datum: 2026-02-04
+Version: v2.1.6
+Datum: 2026-03-02
 
-Empfohlener GitHub Release‑Titel: SECRA OP Tracking v2.1.1 – Build Automation & Version Tracking
+Empfohlener GitHub Release‑Titel: SECRA OP Tracking v2.1.6 – GA4 Gesamtumsatz & Bugfix Preisparser
 
-Diese Version führt automatisierte Versionierung ein und bietet produktionsfertige Build-Artefakte.
+## Highlights v2.1.6
+- **GA4 Gesamtumsatz**: Neues `purchase`-Event befüllt jetzt die Spalte "Gesamtumsatz" in GA4-Berichten
+- **Bugfix Preisparser**: Deutscher Preisstring (`"1.234,56 €"`) wird jetzt korrekt zu `1234.56` normalisiert
+- **VERSION-Datei**: Version wird zentral in einer `VERSION`-Datei gepflegt, kein `git describe` mehr nötig
 
-## Highlights v2.1.1
-- **Automatische Versionierung**: Build-Script injiziert Git-Tag-Version in finale Dateien
-- **Version Tracking**: Jede Datei enthält `@version` und `@buildDate` im Header-Kommentar
-- **Production-Ready Files**: `dist/` Ordner mit versionierten, einsatzbereiten Dateien
-- **Deployment-freundlich**: Einfache Identifikation der verwendeten Version auf Kundenseiten
+## Was ist neu in v2.1.6?
 
-## Was ist neu in v2.1.1?
-- Build-Script `build.sh` für automatisierte Versionierung
-- Version und Build-Datum werden aus Git-Tags extrahiert und in Dateien eingebettet
-- `dist/op-gtag.js` und `dist/op-gtm.js` enthalten Version-Metadaten
-- Source-Dateien (`src/`) mit Platzhaltern für Build-Prozess
+### Neues `purchase`-Event
+Beim Buchungserfolg wird jetzt zusätzlich zum Custom Event `secra_op_object_booking` auch ein Standard-GA4-`purchase`-Event gefeuert. Damit erscheint der Umsatz automatisch in der Spalte "Gesamtumsatz" unter GA4 → Engagement → Ereignisse.
+
+### Bugfix: Preisparser
+`data.price` der OP-API ist ein lokalisierter Anzeigestring (z. B. `"1.234,56 €"`). Der bisherige `parseFloat()`-Aufruf interpretierte den Tausenderpunkt fälschlicherweise als Dezimalzeichen. Beispiel: `"1.234,56 €"` wurde zu `1.234` statt korrekt zu `1234.56` geparst. Dies ist jetzt behoben.
+
+### VERSION-Datei
+Statt `git describe` liest `build.sh` die Version nun standardmäßig aus der Datei `VERSION`. So wird sichergestellt, dass dist-Dateien die korrekte Version erhalten, bevor der Git-Tag gesetzt wird.
 
 ## Build-Prozess
 ```bash
-./build.sh  # Erzeugt dist/op-gtag.js und dist/op-gtm.js mit aktueller Version
+# Version in VERSION-Datei eintragen, dann:
+./build.sh              # liest Version aus VERSION-Datei
+./build.sh v2.1.6       # oder Version direkt als Argument
 ```
 
 ---
 
-## Vorherige Version: v2.1.0
+## Vorherige Version: v2.1.1
 
 ### Highlights v2.1.0
 - **Vollständige Dokumentation**: Alle Markdown-Dateien auf dem neuesten Stand

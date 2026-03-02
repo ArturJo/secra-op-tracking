@@ -53,15 +53,25 @@ Das Skript sendet folgende GA4-Ereignisse mit diesen Parametern:
   - `content_type`: "vacation_rental"
 
 2) Buchung erfolgreich
-- Event-Name: `secra_op_object_booking`
+- Es werden zwei Events gefeuert:
+
+a) Custom Event: `secra_op_object_booking`
 - Parameter:
   - `object_id`: String
   - `transaction_id`: String
+  - `value`: Number (aus deutschem Preisstring normalisiert, Fallback: `0`)
   - `currency`: "EUR"
   - `content_type`: "vacation_rental"
-  - optional: `value`: Number (nur wenn Preis numerisch vorliegt)
 
-Diese Namen/Parameter entsprechen exakt der Implementierung in `src/op-gtag.js` und sind GA4-freundlich gehalten.
+b) Standard GA4 Event: `purchase`
+- Befüllt die Spalte "Gesamtumsatz" in GA4 → Engagement → Ereignisse
+- Parameter:
+  - `transaction_id`: String
+  - `value`: Number
+  - `currency`: "EUR"
+  - `items`: Array mit einem Eintrag (`item_id`, `item_name`, `price`, `quantity`)
+
+Hinweis: `data.price` der OP-API ist ein deutscher Anzeigestring (z. B. `"1.234,56 €"`). Das Skript normalisiert diesen automatisch zu einem numerischen Wert (z. B. `1234.56`).
 
 ## 5) Conversions in GA4 markieren (empfohlen)
 
@@ -117,13 +127,14 @@ Passen Sie die Defaults an Ihr CMP und Ihre Rechtslage an. Stellen Sie sicher, d
 
 - Nicht beide Skripte verwenden: `op-gtm.js` ODER `op-gtag.js`.
 - `gtag` fehlt: Prüfen Sie, ob das GA4 Basis-Snippet im Head korrekt eingebunden ist und die Mess-ID stimmt.
-- Numerische Werte: `value` wird nur gesendet, wenn `price` numerisch ist. Stellen Sie sicher, dass Preise als Zahl vorliegen.
+- Preisformat: OP liefert `price` als deutschen Anzeigestring (z. B. `"1.234,56 €"`). Das Skript parst diesen automatisch. Kein manueller Eingriff nötig.
 - Single-Page-Apps/Widgets: Die hier verwendeten Hooks werden vom SECRA OP Widget ausgelöst, zusätzliche Pageview-Logik ist in der Regel nicht nötig.
 - Versionswechsel: Bei Umbau der Events/Parameter bitte die Doku und eventuelle GA4-Custom-Dimensionen konsistent halten.
 
 ## 10) Kurzübersicht: Was ist nach dieser Anleitung eingerichtet?
 
-- GA4 (gtag.js) sendet direkt zwei SECRA OP Ereignisse an GA4.
-- `secra_op_object_booking` kann in GA4 als Conversion markiert werden.
+- GA4 (gtag.js) sendet direkt drei Ereignisse an GA4: `secra_op_object_view`, `secra_op_object_booking` und `purchase`.
+- `purchase` befüllt automatisch die Spalte "Gesamtumsatz" in GA4 → Engagement → Ereignisse.
+- `secra_op_object_booking` kann zusätzlich als Conversion markiert werden.
 - Optionales Debug-Logging kann beim Implementieren helfen.
 
