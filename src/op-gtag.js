@@ -54,8 +54,12 @@ const sendObjectView = (mod, event, data) => {
 const sendBookingSuccess = (mod, event, data) => {
     if (!data || !data.ObjMetaNr || !data.BuchungNr) return;
 
-    // Parse and validate price with fallback
-    const parsedValue = parseFloat(data.price);
+    // Parse German-formatted price string (e.g. "1.234,56 €" → 1234.56)
+    // OP delivers price as a localized display string: thousand-sep='.', decimal-sep=','
+    const rawPrice = typeof data.price === 'string'
+        ? data.price.replace(/[^\d,.]/g, '').replace(/\./g, '').replace(',', '.')
+        : data.price;
+    const parsedValue = parseFloat(rawPrice);
     const finalValue = Number.isFinite(parsedValue) ? parsedValue : 0;
 
     // Debug warning if price is missing or invalid

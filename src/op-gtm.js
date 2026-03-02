@@ -34,7 +34,11 @@ var sendBookingSuccess = function (mod, event, data) {
     if (!data || !data.ObjMetaNr || !data.BuchungNr) {
         return;
     }
-    var value = parseFloat(data.price);
+    // Parse German-formatted price string (e.g. "1.234,56 €" → 1234.56)
+    var rawPrice = typeof data.price === 'string'
+        ? data.price.replace(/[^\d,.]/g, '').replace(/\./g, '').replace(',', '.')
+        : data.price;
+    var value = parseFloat(rawPrice);
     var dl = {
         event: 'secra_op_object_booking',
         object_id: String(data.ObjMetaNr),
