@@ -6,7 +6,7 @@ Tracking-API und Hook-Schnittstelle dokumentiert OP offiziell unter:
 - https://docs.optimale-praesentation.de/1-Client-Einbindung/3-Tracking.html
 - Eventliste: https://docs.optimale-praesentation.de/1-Client-Einbindung/3-Tracking.html#eventliste
 
-Aussagen in diesem Repo zum Verhalten des OP-Client-Objekts (`window.secra_op_client`) und zur Hook-Registrierungs-Reihenfolge stützen sich auf diese öffentliche Doku. Bei abweichendem Verhalten ist die OP-Doku maßgeblich.
+Hinweis zur Hook-Registrierungs-Reihenfolge: Die offizielle OP-Doku empfiehlt, Hooks vor dem Boot-Script vorzubereiten. In der Praxis funktioniert das aktuell mit den nachgeladenen OP-Modulen nicht zuverlässig — empirisch muss das Tracking-Skript **nach** dem OP-Boot-Script eingebunden werden (siehe Abschnitt „Einbindung der Skripte").
 
 Dateien:
 - src/op-gtm.js (GTM / dataLayer – Quellcode mit `__VERSION__`/`__BUILD_DATE__`-Platzhaltern)
@@ -64,39 +64,38 @@ Hinweise:
 - Empfohlen: Einbindung via jsDelivr-CDN, gepinnt auf einen konkreten Release-Tag (z. B. `@v2.1.6`). Damit ist die Datei unveränderlich gecached und Updates erfolgen kontrolliert durch Anpassen der Versionsnummer.
 - Eingebunden werden die gebauten Dateien aus `dist/` (mit eingebetteter Version und Build-Datum), nicht die Quellen aus `src/`.
 
-### Reihenfolge: Tracking-Skript vor dem OP-Boot-Script
+### Reihenfolge: Tracking-Skript NACH dem OP-Boot-Script
 
-**Bevorzugt: im `<head>`, direkt vor dem `<script src="…/frontend/js/bin/boot?…">`-Tag.**
+**Erforderlich: Tracking-Skript direkt vor dem schließenden `</body>`-Tag einbinden — also NACH dem OP-Boot-Script.**
 
-Hintergrund: Die [OP-Doku](https://docs.optimale-praesentation.de/1-Client-Einbindung/3-Tracking.html) empfiehlt, das Client-Objekt und die Tracking-Hooks vor dem asynchronen Laden des OP-Boot-Scripts vorzubereiten. Vorhandene Hooks bleiben erhalten und werden nicht überschrieben. Die eigentlichen Events (`object.load`, `booking['submit-success']` etc.) werden erst in den nachgeladenen OP-Modulen gefeuert. Wenn das Tracking-Skript vorher synchron geladen wurde, sind die Hooks garantiert gesetzt, bevor irgendein Modul sie aufrufen kann — keine Race Conditions, unabhängig vom Lade-Timing der OP-Module.
+Empirisch festgestellt: Die nachgeladenen OP-Module (`op-frontend-object`, `op-frontend-booking` etc.) bauen ihren eigenen Tracking-State auf und überschreiben dabei vorab gesetzte Hooks bzw. ignorieren sie. Wird `op-gtm.js`/`op-gtag.js` vor dem OP-Boot-Script geladen, gehen die Hook-Registrierungen verloren und keine Events werden gefeuert. Die OP-Doku empfiehlt zwar abweichend „vor dem Boot" – in der Praxis funktioniert mit aktuellen OP-Modulen nur die Reihenfolge „nach dem Boot".
 
-Alternative: Einbindung direkt vor `</body>`. Funktioniert in der Praxis, weil OP-Module typischerweise erst nach Sichtbarkeit/User-Interaktion Events feuern, ist aber theoretisch nicht race-frei (z. B. bei automatischem Objekt-Load über Deep-Link).
-
-GTM (dataLayer) Beispiel — empfohlen, im `<head>` vor dem OP-Boot-Script:
+GTM (dataLayer) Beispiel:
 
 ```html
 <head>
-  <!-- ... -->
-  <!-- Tracking zuerst (synchron) -->
+  <!-- ... GTM-Container, GA4-Snippet etc. ... -->
+  <script async src="https://www.optimale-praesentation.de/frontend/js/bin/boot?secratoid=xxxxxxxxx"></script>
+</head>
+<body>
+  <!-- Seite/Inhalt ... -->
+  <!-- direkt vor </body>: Tracking ZULETZT -->
   <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.7/dist/op-gtm.js"></script>
-  <!-- danach: OP-Boot-Script -->
-  <script async src="https://www.optimale-praesentation.de/frontend/js/bin/boot?secratoid=xxxxxxxxx"></script>
-</head>
+</body>
 ```
 
-GA4 (gtag) Beispiel — empfohlen, im `<head>` vor dem OP-Boot-Script:
+GA4 (gtag) Beispiel:
 
 ```html
 <head>
-  <!-- GA4 base tag (siehe oben) -->
-  <!-- Tracking zuerst (synchron) -->
-  <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.7/dist/op-gtag.js"></script>
-  <!-- danach: OP-Boot-Script -->
+  <!-- ... GA4 base tag etc. ... -->
   <script async src="https://www.optimale-praesentation.de/frontend/js/bin/boot?secratoid=xxxxxxxxx"></script>
 </head>
+<body>
+  <!-- Seite/Inhalt ... -->
+  <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.7/dist/op-gtag.js"></script>
+</body>
 ```
-
-Alternativ direkt vor `</body>` (siehe Abschnitt „Reihenfolge" oben — funktioniert in der Praxis, aber nicht garantiert race-frei).
 
 Hinweise zur URL:
 - Schema: `https://cdn.jsdelivr.net/gh/<owner>/<repo>@<tag>/<pfad>`

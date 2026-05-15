@@ -12,25 +12,24 @@ Wichtiger Hinweis:
 - Entweder:
   - GA4 Konfiguration soll über GTM erfolgen (empfohlen), oder
   - GA4 Tracking läuft bereits nativ (gtag.js). In diesem Dokument wird der Weg über GTM beschrieben.
-- In Ihrer Seite ist das Skript `op-gtm.js` eingebunden. Dieses Skript pusht Events in den dataLayer.
+- In Ihrer Seite ist das Skript `op-gtm.js` eingebunden (direkt vor `</body>`, also NACH dem OP-Boot-Script im `<head>`). Dieses Skript pusht Events in den dataLayer.
 
-**Empfohlen: Einbindung im `<head>`, synchron, direkt vor dem OP-Boot-Script** (via jsDelivr-CDN, gepinnt auf einen konkreten Release-Tag):
+**Erforderlich: Einbindung direkt vor `</body>`, also NACH dem OP-Boot-Script** (via jsDelivr-CDN, gepinnt auf einen konkreten Release-Tag):
 
 ```html
 <head>
   <!-- ... GTM-Container (siehe README) ... -->
-
-  <!-- 1) Tracking-Hooks zuerst registrieren -->
-  <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.7/dist/op-gtm.js"></script>
-
-  <!-- 2) Danach: OP-Boot-Script (async) -->
   <script async src="https://www.optimale-praesentation.de/frontend/js/bin/boot?secratoid=xxxxxxxxx"></script>
 </head>
+<body>
+  <!-- Seite/Inhalt ... -->
+
+  <!-- direkt vor </body>: Tracking zuletzt -->
+  <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.7/dist/op-gtm.js"></script>
+</body>
 ```
 
-Warum diese Reihenfolge: Die [OP-Doku](https://docs.optimale-praesentation.de/1-Client-Einbindung/3-Tracking.html) empfiehlt, das Client-Objekt und die Tracking-Hooks vor dem asynchronen Laden des OP-Boot-Scripts vorzubereiten. Vorhandene Hooks bleiben erhalten und werden nicht überschrieben. Die eigentlichen Events werden erst in nachgeladenen OP-Modulen gefeuert. Ist `op-gtm.js` vorher synchron geladen, sind die Hooks garantiert gesetzt, bevor sie aufgerufen werden — race-frei.
-
-Alternative: Einbindung direkt vor `</body>`. Funktioniert in der Praxis, weil OP-Module typischerweise erst nach User-Interaktion Events feuern, ist aber nicht garantiert race-frei (z. B. bei automatischem Objekt-Load über Deep-Link).
+Warum diese Reihenfolge: Empirisch festgestellt — die nachgeladenen OP-Module (`op-frontend-object`, `op-frontend-booking` etc.) bauen ihren eigenen Tracking-State auf und überschreiben oder ignorieren vorab gesetzte Hooks. Wird `op-gtm.js` vor dem OP-Boot-Script geladen, gehen die Hook-Registrierungen verloren und keine Events werden gefeuert. Die [OP-Doku](https://docs.optimale-praesentation.de/1-Client-Einbindung/3-Tracking.html) empfiehlt zwar abweichend „vor dem Boot" — in der Praxis funktioniert mit aktuellen OP-Modulen nur die Reihenfolge „nach dem Boot".
 
 Hinweise:
 - Eingebunden wird die gebaute Datei aus `dist/` (mit eingebetteter Version und Build-Datum), nicht die Quelle aus `src/`.
