@@ -4,6 +4,22 @@
     <meta charset="UTF-8">
     <title>Nur ein Test für eine WIX Seite</title>
 
+    <!--
+      SECRA OP Tracking
+      Variante A: Google Tag Manager (op-gtm.js) – Events werden in den dataLayer gepusht.
+      Variante B: GA4 direkt via gtag.js (op-gtag.js) – siehe Kommentar unten.
+      Pro Seite immer NUR eine der beiden Varianten einbinden.
+
+      Wichtig: Das Tracking-Script muss VOR der OP-Boot-Script geladen werden (kein async),
+      damit die Hooks an window.secra_op_client.tracking gesetzt sind, bevor das OP-Modul
+      Events feuert. Der Tag (z. B. v2.1.6) sollte gegen die gewünschte Release-Version
+      gepinnt sein.
+    -->
+    <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.6/dist/op-gtm.js"></script>
+    <!-- Variante B (GA4 direkt, statt op-gtm.js):
+    <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.6/dist/op-gtag.js"></script>
+    -->
+
     <!-- MANDATORY: Replace 'xxxxxxxxx' with your actual secratoid -->
     <script async type="text/javascript"
             src="https://www.optimale-praesentation.de/frontend/js/bin/boot?secratoid=xxxxxxxxx"></script>

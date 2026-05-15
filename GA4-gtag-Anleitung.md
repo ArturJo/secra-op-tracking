@@ -30,15 +30,30 @@ Hinweise:
 - Ersetzen Sie `G-XXXXXXX` durch Ihre GA4 Measurement ID.
 - Fügen Sie zusätzliche `gtag('consent', ...)` oder `gtag('config', ...)` Aufrufe hier an, falls erforderlich (z. B. Consent Mode, IP-Anonymisierung ist in GA4 standardmäßig aktiv).
 
-## 3) op-gtag.js auf der Seite einbinden (vor </body>)
+## 3) op-gtag.js auf der Seite einbinden
 
-Binden Sie das Skript kurz vor dem schließenden `</body>` ein:
+**Empfohlen: im `<head>`, synchron, direkt vor dem OP-Boot-Script.** Auslieferung via jsDelivr-CDN, gepinnt auf einen konkreten Release-Tag.
 
 ```html
-<!-- direkt vor </body> -->
-<script src="/path/to/src/op-gtag.js"></script>
-</body>
+<head>
+  <!-- ... GA4 base tag (siehe Abschnitt 2) ... -->
+
+  <!-- 1) Tracking-Hooks zuerst registrieren -->
+  <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.6/dist/op-gtag.js"></script>
+
+  <!-- 2) Danach: OP-Boot-Script (async) -->
+  <script async src="https://www.optimale-praesentation.de/frontend/js/bin/boot?secratoid=xxxxxxxxx"></script>
+</head>
 ```
+
+Warum diese Reihenfolge: Die [OP-Doku](https://docs.optimale-praesentation.de/1-Client-Einbindung/3-Tracking.html) empfiehlt, das Client-Objekt und die Tracking-Hooks vor dem asynchronen Laden des OP-Boot-Scripts vorzubereiten. Vorhandene Hooks bleiben erhalten und werden nicht überschrieben. Die eigentlichen Events werden erst in nachgeladenen OP-Modulen gefeuert. Ist `op-gtag.js` vorher synchron geladen, sind die Hooks garantiert gesetzt, bevor sie aufgerufen werden — race-frei.
+
+Alternative: Einbindung direkt vor `</body>`. Funktioniert in der Praxis, weil OP-Module typischerweise erst nach User-Interaktion Events feuern, ist aber nicht garantiert race-frei (z. B. bei automatischem Objekt-Load über Deep-Link).
+
+Hinweise:
+- Eingebunden wird die gebaute Datei aus `dist/` (enthält Version und Build-Datum), nicht die Quelle aus `src/`.
+- Den Tag (`@v2.1.6`) immer auf eine konkrete Version pinnen – `@main` oder weglassen würde latest-Builds liefern und das Caching schwächen.
+- Bei einem neuen Release die Versionsnummer in der eigenen Seite mit hochziehen.
 
 Das Skript registriert sich an den SECRA OP Hooks und sendet beim Eintreten der Ereignisse die GA4-Events über `gtag('event', ...)`.
 
@@ -100,7 +115,7 @@ Vor dem Laden von `src/op-gtag.js` können Sie Debug-Logs aktivieren:
   window.secra_op_client.tracking = window.secra_op_client.tracking || {};
   window.secra_op_client.tracking.debug = true; // Debug aktivieren
 </script>
-<script src="/path/to/src/op-gtag.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.6/dist/op-gtag.js"></script>
 ```
 
 - Wenn `debug = true` und `gtag` fehlt, erscheint eine Warnung: "gtag() is not available — event skipped." (nicht fatal).

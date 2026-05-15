@@ -2,9 +2,16 @@
 
 Kleine Hilfsskripte, um Tracking-Events der SECRA OP Widgets entweder in den Google Tag Manager (GTM, dataLayer) oder direkt an Google Analytics 4 (GA4 via gtag.js) zu senden.
 
+Tracking-API und Hook-Schnittstelle dokumentiert OP offiziell unter:
+- https://docs.optimale-praesentation.de/1-Client-Einbindung/3-Tracking.html
+- Eventliste: https://docs.optimale-praesentation.de/1-Client-Einbindung/3-Tracking.html#eventliste
+
+Aussagen in diesem Repo zum Verhalten des OP-Client-Objekts (`window.secra_op_client`) und zur Hook-Registrierungs-Reihenfolge stützen sich auf diese öffentliche Doku. Bei abweichendem Verhalten ist die OP-Doku maßgeblich.
+
 Dateien:
-- src/op-gtm.js (GTM / dataLayer)
-- src/op-gtag.js (GA4 / gtag)
+- src/op-gtm.js (GTM / dataLayer – Quellcode mit `__VERSION__`/`__BUILD_DATE__`-Platzhaltern)
+- src/op-gtag.js (GA4 / gtag – Quellcode mit `__VERSION__`/`__BUILD_DATE__`-Platzhaltern)
+- dist/op-gtm.js, dist/op-gtag.js (Auslieferungsdateien mit eingebetteter Version und Build-Datum – diese per CDN einbinden, nicht src/)
 - GTM-Events-Anleitung.md (Schritt-für-Schritt-Anleitung für GTM Events und Conversions)
 - GA4-gtag-Anleitung.md (Schritt-für-Schritt-Anleitung für direkte GA4/gtag Einrichtung)
 - VERSION (aktuelle Versionsnummer für den Build-Prozess)
@@ -51,27 +58,50 @@ Hinweise:
 - Nur eine aktive Sendequelle je Seite: GTM oder natives GA4/gtag.
 - Snippets können sich ändern – bitte mit den aktuellen Vorgaben in Ihrem Google‑Konto abgleichen.
 
-## Einbindung der Skripte (vor </body>)
+## Einbindung der Skripte
 
-- Skript direkt vor dem schließenden </body> einbinden (gilt für beide Varianten).
 - Nicht beide Skripte gleichzeitig verwenden.
+- Empfohlen: Einbindung via jsDelivr-CDN, gepinnt auf einen konkreten Release-Tag (z. B. `@v2.1.6`). Damit ist die Datei unveränderlich gecached und Updates erfolgen kontrolliert durch Anpassen der Versionsnummer.
+- Eingebunden werden die gebauten Dateien aus `dist/` (mit eingebetteter Version und Build-Datum), nicht die Quellen aus `src/`.
 
-GTM (dataLayer) Beispiel:
+### Reihenfolge: Tracking-Skript vor dem OP-Boot-Script
+
+**Bevorzugt: im `<head>`, direkt vor dem `<script src="…/frontend/js/bin/boot?…">`-Tag.**
+
+Hintergrund: Die [OP-Doku](https://docs.optimale-praesentation.de/1-Client-Einbindung/3-Tracking.html) empfiehlt, das Client-Objekt und die Tracking-Hooks vor dem asynchronen Laden des OP-Boot-Scripts vorzubereiten. Vorhandene Hooks bleiben erhalten und werden nicht überschrieben. Die eigentlichen Events (`object.load`, `booking['submit-success']` etc.) werden erst in den nachgeladenen OP-Modulen gefeuert. Wenn das Tracking-Skript vorher synchron geladen wurde, sind die Hooks garantiert gesetzt, bevor irgendein Modul sie aufrufen kann — keine Race Conditions, unabhängig vom Lade-Timing der OP-Module.
+
+Alternative: Einbindung direkt vor `</body>`. Funktioniert in der Praxis, weil OP-Module typischerweise erst nach Sichtbarkeit/User-Interaktion Events feuern, ist aber theoretisch nicht race-frei (z. B. bei automatischem Objekt-Load über Deep-Link).
+
+GTM (dataLayer) Beispiel — empfohlen, im `<head>` vor dem OP-Boot-Script:
 
 ```html
-<!-- Seite/Inhalt ... -->
-<!-- direkt vor </body> -->
-<script src="/path/to/src/op-gtm.js"></script>
-</body>
+<head>
+  <!-- ... -->
+  <!-- Tracking zuerst (synchron) -->
+  <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.6/dist/op-gtm.js"></script>
+  <!-- danach: OP-Boot-Script -->
+  <script async src="https://www.optimale-praesentation.de/frontend/js/bin/boot?secratoid=xxxxxxxxx"></script>
+</head>
 ```
 
-GA4 (gtag) Beispiel:
+GA4 (gtag) Beispiel — empfohlen, im `<head>` vor dem OP-Boot-Script:
 
 ```html
-<!-- direkt vor </body> -->
-<script src="/path/to/src/op-gtag.js"></script>
-</body>
+<head>
+  <!-- GA4 base tag (siehe oben) -->
+  <!-- Tracking zuerst (synchron) -->
+  <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.6/dist/op-gtag.js"></script>
+  <!-- danach: OP-Boot-Script -->
+  <script async src="https://www.optimale-praesentation.de/frontend/js/bin/boot?secratoid=xxxxxxxxx"></script>
+</head>
 ```
+
+Alternativ direkt vor `</body>` (siehe Abschnitt „Reihenfolge" oben — funktioniert in der Praxis, aber nicht garantiert race-frei).
+
+Hinweise zur URL:
+- Schema: `https://cdn.jsdelivr.net/gh/<owner>/<repo>@<tag>/<pfad>`
+- Den `@<tag>` immer auf eine konkrete Version pinnen. `@main` oder weglassen würde latest-Builds liefern und Caching schwächen.
+- Bei jedem neuen Release die Versionsnummer in der eigenen Seite mit hochziehen.
 
 ## Google Tag Manager (GTM) – src/op-gtm.js
 
@@ -192,7 +222,7 @@ Vor Einbindung von `src/op-gtag.js` kann ein Debug‑Flag gesetzt werden:
   window.secra_op_client.tracking = window.secra_op_client.tracking || {};
   window.secra_op_client.tracking.debug = true; // Debug aktivieren
 </script>
-<script src="/path/to/src/op-gtag.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.6/dist/op-gtag.js"></script>
 ```
 
 - Wenn `debug = true` und `gtag` fehlt oder ein Fehler beim Senden auftritt, erscheinen Warnungen in der Konsole (z. B. "gtag() is not available — event skipped.").
