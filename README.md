@@ -78,7 +78,7 @@ GTM (dataLayer) Beispiel — empfohlen, im `<head>` vor dem OP-Boot-Script:
 <head>
   <!-- ... -->
   <!-- Tracking zuerst (synchron) -->
-  <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.6/dist/op-gtm.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.7/dist/op-gtm.js"></script>
   <!-- danach: OP-Boot-Script -->
   <script async src="https://www.optimale-praesentation.de/frontend/js/bin/boot?secratoid=xxxxxxxxx"></script>
 </head>
@@ -90,7 +90,7 @@ GA4 (gtag) Beispiel — empfohlen, im `<head>` vor dem OP-Boot-Script:
 <head>
   <!-- GA4 base tag (siehe oben) -->
   <!-- Tracking zuerst (synchron) -->
-  <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.6/dist/op-gtag.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.7/dist/op-gtag.js"></script>
   <!-- danach: OP-Boot-Script -->
   <script async src="https://www.optimale-praesentation.de/frontend/js/bin/boot?secratoid=xxxxxxxxx"></script>
 </head>
@@ -222,7 +222,7 @@ Vor Einbindung von `src/op-gtag.js` kann ein Debug‑Flag gesetzt werden:
   window.secra_op_client.tracking = window.secra_op_client.tracking || {};
   window.secra_op_client.tracking.debug = true; // Debug aktivieren
 </script>
-<script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.6/dist/op-gtag.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.7/dist/op-gtag.js"></script>
 ```
 
 - Wenn `debug = true` und `gtag` fehlt oder ein Fehler beim Senden auftritt, erscheinen Warnungen in der Konsole (z. B. "gtag() is not available — event skipped.").

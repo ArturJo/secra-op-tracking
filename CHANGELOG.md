@@ -5,6 +5,27 @@ All notable changes to the SECRA OP Tracking scripts will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.7] - 2026-05-15
+
+### Added
+  - Empfohlene Einbindung der Tracking-Skripte via jsDelivr-CDN, gepinnt auf konkrete Release-Tags (`https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@vX.Y.Z/dist/...`)
+  - Neuer Abschnitt zur Einbindungs-Reihenfolge in `README.md`, `GA4-gtag-Anleitung.md` und `GTM-Events-Anleitung.md`: Tracking-Skript synchron im `<head>` vor dem OP-Boot-Script — race-frei gegenüber dem dynamischen Modul-Loading durch OP
+  - Verweis auf die offizielle OP-Doku (https://docs.optimale-praesentation.de/1-Client-Einbindung/3-Tracking.html) im `README.md` als Quelle für Tracking-API und Hook-Verhalten
+  - `release.sh`: One-shot Release-Skript mit Pre-Flight-Checks, automatischer CHANGELOG-Skelett-Vorlage, jsDelivr-Pin-Update in der Doku und sauberer Commit-/Tag-Reihenfolge
+
+### Changed
+  - Code-Beispiele in `README.md`, `GA4-gtag-Anleitung.md` und `GTM-Events-Anleitung.md` zeigen die Head-Variante als Default. Die `</body>`-Einbindung bleibt als Alternative dokumentiert (in der Praxis ausreichend, theoretisch nicht garantiert race-frei)
+  - Eingebunden werden jetzt die gebauten Dateien aus `dist/` (mit eingebetteter Version und Build-Datum) statt Platzhalter `/path/to/src/`
+  - `wix/wix-op-integration.html`: Tracking-Embed (`op-gtm.js` via jsDelivr) im `<head>` ergänzt, Reihenfolge zu OP-Boot-Script dokumentiert
+  - `release.sh` aktualisiert beim nächsten Release automatisch alle jsDelivr-Tag-Pins in Doku und `wix/`-Snippet, damit die Versionsnummer nicht über die Dateien driftet
+
+### Removed
+  - `wix/wix.html` — legacy WIX-Beispiel mit inline kopiertem Tracking-Code und veralteten camelCase-Event-Namen (`objectView`, `objectBooking`). Ersetzt durch `wix/wix-op-integration.html` + Einbindung von `op-gtm.js` bzw. `op-gtag.js` via CDN
+  - `RELEASE-NOTES.md` — inhaltlich duplikativ zu `CHANGELOG.md` und nicht vom Release-Workflow gepflegt; GitHub-Releases übernehmen diese Rolle
+
+
+---
+
 ## [2.1.6] - 2026-03-02
 
 ### Added

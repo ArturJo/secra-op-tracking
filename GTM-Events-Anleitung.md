@@ -21,7 +21,7 @@ Wichtiger Hinweis:
   <!-- ... GTM-Container (siehe README) ... -->
 
   <!-- 1) Tracking-Hooks zuerst registrieren -->
-  <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.6/dist/op-gtm.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.7/dist/op-gtm.js"></script>
 
   <!-- 2) Danach: OP-Boot-Script (async) -->
   <script async src="https://www.optimale-praesentation.de/frontend/js/bin/boot?secratoid=xxxxxxxxx"></script>
