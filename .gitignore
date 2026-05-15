@@ -50,3 +50,13 @@
 
 # Embedded web-server pid file
 /.web-server-pid
+
+# Claude Code (lokale Konfiguration, nicht ins Repo)
+/CLAUDE.md
+/.claude/
+
+# IDE
+/.idea/
+
+# Interne Notizen / Arbeitsdateien (nicht Library)
+/_stuff/
