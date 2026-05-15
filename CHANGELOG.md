@@ -5,6 +5,27 @@ All notable changes to the SECRA OP Tracking scripts will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.8] - 2026-05-15
+
+### Fixed
+  - Doku-Empfehlung zur Einbindungs-Reihenfolge korrigiert: Tracking-Skript muss NACH dem OP-Boot-Script eingebunden werden (direkt vor `</body>`), nicht davor. v2.1.7-Anweisungen zur Einbindung im `<head>` vor dem Boot führten in der Praxis dazu, dass nachgeladene OP-Module
+  (`op-frontend-object`, `op-frontend-booking` etc.) vorab gesetzte Hooks überschreiben oder ignorieren — folglich wurden keine Events gefeuert. Empirisch verifiziert
+
+### Changed
+  - `README.md`, `GA4-gtag-Anleitung.md`, `GTM-Events-Anleitung.md`: Code-Beispiele und Erklärungstext zur Hook-Registrierungs-Reihenfolge zeigen jetzt strikt die Body-Variante. Hinweis ergänzt, dass die offizielle OP-Doku abweichend „vor dem Boot" empfiehlt, dies aber mit aktuellen
+  OP-Modulen nicht funktioniert
+  - `wix/wix-op-integration.html`: Tracking-Embed (`op-gtm.js`/`op-gtag.js` via jsDelivr) aus dem `<head>` entfernt und direkt vor `</body>` platziert
+
+
+
+
+
+
+
+
+
+---
+
 ## [2.1.7] - 2026-05-15
 
 ### Added
