@@ -241,6 +241,46 @@ Schritte in GTM:
    - Wenn Sie dasselbe Ereignis auch via GA4-Schlüsselereignis-Import nach Google Ads übergeben, vermeiden Sie Doppelzählungen. Entscheiden Sie sich entweder für den direkten Ads-Tag (oben) ODER den Import der GA4-Schlüsselereignisse in Google Ads (empfohlen) – nicht beides parallel.
    - Pfad in Google Ads (UI-Stand 2026): unter **Ziele → Conversions** eine neue Conversion-Aktion vom Typ **Import → Google Analytics 4 (Web)** anlegen und dort das gewünschte Schlüsselereignis auswählen. Die exakte Bezeichnung der Menüpunkte kann sich ändern – aktuelle Anleitung: <https://support.google.com/google-ads/answer/10967938>.
 
+### C) Optional: Erweiterte Conversions (Enhanced Conversions) für Google Ads
+
+Erweiterte Conversions (Enhanced Conversions) verbessern die Conversion-Zuordnung in Google Ads, indem **gehashte First-Party-Daten** (E-Mail, Telefon, Name, Adresse) zusammen mit der Conversion an Google gesendet werden. Sinnvoll, sobald Sie mindestens einen Google Ads Conversion Tag (siehe 8 B) im Container haben.
+
+> **Aktivierung erfolgt bewusst nicht über die Basis-Importvorlage**, da Enhanced Conversions personenbezogene Daten verarbeitet und damit zwingend an einen Consent-Mechanismus und eine angepasste Datenschutzerklärung gebunden ist. Die Aktivierung muss pro Kunde eine bewusste Entscheidung sein.
+
+**Voraussetzungen vor Aktivierung:**
+
+- Funktionierende Consent-Lösung (z. B. Google Consent Mode v2) mit Einwilligung für `ad_user_data` und `ad_personalization`
+- Datenschutzerklärung enthält Hinweis auf gehashte Übermittlung von Kontaktdaten an Google
+- Mindestens ein Google Ads Conversion Tag im Container (siehe 8 B)
+- In Google Ads ist die Conversion-Aktion auf „Erweiterte Conversions: Wird über Google Tag Manager verwaltet" konfiguriert
+
+**Einrichtung in GTM (zentraler Weg – empfohlen):**
+
+1. Variable anlegen
+   - Name: `SECRA OP – UserData – Automatic`
+   - Typ: **Von Nutzern bereitgestellte Daten** (User-provided data)
+   - Modus: **Automatic collection**
+   - Aktive Felder: E-Mail, Telefonnummer, Name und Adresse (Default)
+2. Im bestehenden `SECRA OP – Google Tag – GA4 (Config)` Tag (siehe Abschnitt 6) den Abschnitt **Konfigurationsparameter** erweitern:
+   - **Parameter:** `user_data`
+   - **Wert:** `{{SECRA OP – UserData – Automatic}}`
+3. Container speichern und im **Vorschau-Modus** testen (siehe unten)
+
+Vorteil des zentralen Wegs: Der `user_data`-Parameter im Google Tag wird von allen nachgelagerten Google-Tags (Google Ads Conversion Tracking, Floodlight) automatisch mit übernommen – kein Eintrag pro Tag nötig.
+
+**Alternative (pro Conversion-Tag):** Den Parameter `user_data` = `{{SECRA OP – UserData – Automatic}}` direkt im jeweiligen Google Ads Conversion Tag unter „Ereignisparameter" eintragen. Nur sinnvoll, wenn nicht alle Tags Enhanced Conversions nutzen sollen.
+
+**Verifikation:**
+
+1. GTM-Vorschau starten, Testbuchung durchspielen
+2. Browser-DevTools → Network-Tab → Filter auf `googleadservices.com` (für Google Ads) bzw. `google-analytics.com/g/collect` (für GA4)
+3. Im Request-Payload müssen Hash-Parameter wie `em=` (E-Mail), `pn=` (Telefon), `fn=`/`ln=` (Vor-/Nachname) auftauchen – das sind die SHA-256-Hashes, die GTM automatisch erzeugt
+4. Nach 24–48 h prüft Google Ads im Conversion-Eintrag den Status: „Erweiterte Conversions: aktiviert, X % mit erweiterten Daten" – Quote sollte mittelfristig > 50 % erreichen
+
+**Falls Quote zu niedrig:** Variable von „Automatic collection" auf **Manual configuration** umstellen und gezielt CSS-Selektoren der OP-Buchungsbestätigungsseite eintragen (oft sind E-Mail/Telefon dort als Text sichtbar, nicht als Eingabefeld). Notfalls auf den **Code-Modus** wechseln und eine eigene JavaScript-Funktion bereitstellen.
+
+> **Hinweis zur deprecated Option:** Im Google Ads Conversion Tag gibt es zusätzlich noch die Checkbox „Erweiterte Conversions manuell aktivieren". Diese ist seit 2024 deprecated und wird von GTM standardmäßig ausgeblendet (`ng-hide`). Verwenden Sie den oben beschriebenen Weg über `user_data` als Ereignisparameter – das ist die offizielle, zukunftssichere Methode.
+
 ## 9) Testen & Debugging
 
 - GTM Vorschau (Preview) starten, Ihre Seite laden.
