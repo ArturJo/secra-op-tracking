@@ -1,0 +1,410 @@
+{
+  "exportFormatVersion": 2,
+  "exportTime": "2026-05-28 00:00:00",
+  "containerVersion": {
+    "path": "accounts/0/containers/0/versions/0",
+    "accountId": "0",
+    "containerId": "0",
+    "containerVersionId": "0",
+    "name": "SECRA OP Tracking – v2.1.8",
+    "description": "Importvorlage: Variablen, Trigger und GA4-Tags für dist/op-gtm.js (SECRA OP Tracking). Alle Bausteine sind mit Prefix 'SECRA OP – ' versehen und in den Ordner 'SECRA OP Tracking' gruppiert, um Konflikte mit Bestand zu vermeiden. Nach dem Import nur die Konstante 'SECRA OP – Const – GA4 Measurement ID' (G-XXXXXXXX) auf die eigene GA4 Mess-ID setzen.",
+    "container": {
+      "path": "accounts/0/containers/0",
+      "accountId": "0",
+      "containerId": "0",
+      "name": "SECRA OP Tracking",
+      "publicId": "GTM-XXXXXXX",
+      "usageContext": ["WEB"],
+      "fingerprint": "1",
+      "tagManagerUrl": "https://tagmanager.google.com/",
+      "features": {
+        "supportUserPermissions": true,
+        "supportEnvironments": true,
+        "supportWorkspaces": true,
+        "supportGtagConfigs": true,
+        "supportBuiltInVariables": true,
+        "supportClients": true,
+        "supportFolders": true,
+        "supportTags": true,
+        "supportTemplates": true,
+        "supportTriggers": true,
+        "supportVariables": true,
+        "supportVersions": true,
+        "supportZones": true,
+        "supportTransformations": true
+      },
+      "tagIds": ["GTM-XXXXXXX"]
+    },
+    "folder": [
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "folderId": "100",
+        "name": "SECRA OP Tracking",
+        "fingerprint": "1",
+        "notes": "Alle Bausteine der SECRA OP Tracking Integration (v2.1.8). Datenquelle: dist/op-gtm.js aus ArturJo/secra-op-tracking. Doku: https://github.com/ArturJo/secra-op-tracking/blob/main/GTM-Events-Anleitung.md"
+      }
+    ],
+    "tag": [
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "tagId": "1",
+        "name": "SECRA OP – Google Tag – GA4 (Config)",
+        "type": "googtag",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "tagId",
+            "value": "{{SECRA OP – Const – GA4 Measurement ID}}"
+          }
+        ],
+        "fingerprint": "1",
+        "firingTriggerId": ["2147479553"],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": { "type": "MAP" },
+        "consentSettings": { "consentStatus": "NOT_SET" },
+        "parentFolderId": "100",
+        "notes": "Teil der SECRA OP Tracking Integration (v2.1.8). GA4-Konfiguration (Google Tag) für die SECRA-Events. Falls im Container bereits ein anderer Google Tag (GA4 Config) existiert: diesen Tag pausieren oder löschen und in den drei 'SECRA OP – GA4 – Event – …' Tags den Eintrag 'Messung-ID' auf die eigene Mess-ID-Variable umstellen. Doku: https://github.com/ArturJo/secra-op-tracking/blob/main/GTM-Events-Anleitung.md"
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "tagId": "2",
+        "name": "SECRA OP – GA4 – Event – secra_op_object_view",
+        "type": "gaawe",
+        "parameter": [
+          { "type": "BOOLEAN", "key": "sendEcommerceData", "value": "false" },
+          { "type": "TEMPLATE", "key": "eventName", "value": "secra_op_object_view" },
+          {
+            "type": "LIST",
+            "key": "eventParameters",
+            "list": [
+              {
+                "type": "MAP",
+                "map": [
+                  { "type": "TEMPLATE", "key": "name", "value": "object_id" },
+                  { "type": "TEMPLATE", "key": "value", "value": "{{SECRA OP – dlv.object_id}}" }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  { "type": "TEMPLATE", "key": "name", "value": "content_type" },
+                  { "type": "TEMPLATE", "key": "value", "value": "{{SECRA OP – dlv.content_type}}" }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "measurementIdOverride",
+            "value": "{{SECRA OP – Const – GA4 Measurement ID}}"
+          }
+        ],
+        "fingerprint": "1",
+        "firingTriggerId": ["10"],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": { "type": "MAP" },
+        "consentSettings": { "consentStatus": "NOT_SET" },
+        "parentFolderId": "100",
+        "notes": "Teil der SECRA OP Tracking Integration (v2.1.8). Sendet das custom GA4-Event 'secra_op_object_view' (Objektansicht/Ferienunterkunft). Datenquelle: dist/op-gtm.js aus ArturJo/secra-op-tracking. Doku: https://github.com/ArturJo/secra-op-tracking/blob/main/GTM-Events-Anleitung.md"
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "tagId": "3",
+        "name": "SECRA OP – GA4 – Event – secra_op_object_booking",
+        "type": "gaawe",
+        "parameter": [
+          { "type": "BOOLEAN", "key": "sendEcommerceData", "value": "false" },
+          { "type": "TEMPLATE", "key": "eventName", "value": "secra_op_object_booking" },
+          {
+            "type": "LIST",
+            "key": "eventParameters",
+            "list": [
+              {
+                "type": "MAP",
+                "map": [
+                  { "type": "TEMPLATE", "key": "name", "value": "object_id" },
+                  { "type": "TEMPLATE", "key": "value", "value": "{{SECRA OP – dlv.object_id}}" }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  { "type": "TEMPLATE", "key": "name", "value": "transaction_id" },
+                  { "type": "TEMPLATE", "key": "value", "value": "{{SECRA OP – dlv.transaction_id}}" }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  { "type": "TEMPLATE", "key": "name", "value": "currency" },
+                  { "type": "TEMPLATE", "key": "value", "value": "{{SECRA OP – dlv.currency}}" }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  { "type": "TEMPLATE", "key": "name", "value": "content_type" },
+                  { "type": "TEMPLATE", "key": "value", "value": "{{SECRA OP – dlv.content_type}}" }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  { "type": "TEMPLATE", "key": "name", "value": "value" },
+                  { "type": "TEMPLATE", "key": "value", "value": "{{SECRA OP – dlv.value}}" }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "measurementIdOverride",
+            "value": "{{SECRA OP – Const – GA4 Measurement ID}}"
+          }
+        ],
+        "fingerprint": "1",
+        "firingTriggerId": ["11"],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": { "type": "MAP" },
+        "consentSettings": { "consentStatus": "NOT_SET" },
+        "parentFolderId": "100",
+        "notes": "Teil der SECRA OP Tracking Integration (v2.1.8). Sendet das custom GA4-Event 'secra_op_object_booking' (Buchungserfolg). Kann in GA4 zusätzlich als Conversion markiert werden. Datenquelle: dist/op-gtm.js aus ArturJo/secra-op-tracking. Doku: https://github.com/ArturJo/secra-op-tracking/blob/main/GTM-Events-Anleitung.md"
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "tagId": "4",
+        "name": "SECRA OP – GA4 – Event – purchase",
+        "type": "gaawe",
+        "parameter": [
+          { "type": "BOOLEAN", "key": "sendEcommerceData", "value": "true" },
+          { "type": "TEMPLATE", "key": "getEcommerceDataFrom", "value": "dataLayer" },
+          { "type": "TEMPLATE", "key": "eventName", "value": "purchase" },
+          {
+            "type": "LIST",
+            "key": "eventParameters",
+            "list": [
+              {
+                "type": "MAP",
+                "map": [
+                  { "type": "TEMPLATE", "key": "name", "value": "transaction_id" },
+                  { "type": "TEMPLATE", "key": "value", "value": "{{SECRA OP – dlv.transaction_id}}" }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  { "type": "TEMPLATE", "key": "name", "value": "value" },
+                  { "type": "TEMPLATE", "key": "value", "value": "{{SECRA OP – dlv.value}}" }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  { "type": "TEMPLATE", "key": "name", "value": "currency" },
+                  { "type": "TEMPLATE", "key": "value", "value": "{{SECRA OP – dlv.currency}}" }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  { "type": "TEMPLATE", "key": "name", "value": "items" },
+                  { "type": "TEMPLATE", "key": "value", "value": "{{SECRA OP – dlv.items}}" }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "measurementIdOverride",
+            "value": "{{SECRA OP – Const – GA4 Measurement ID}}"
+          }
+        ],
+        "fingerprint": "1",
+        "firingTriggerId": ["12"],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": { "type": "MAP" },
+        "consentSettings": { "consentStatus": "NOT_SET" },
+        "parentFolderId": "100",
+        "notes": "Teil der SECRA OP Tracking Integration (v2.1.8). Sendet das GA4-Standardereignis 'purchase' (befüllt 'Gesamtumsatz' in GA4 → Engagement → Ereignisse). items werden direkt aus dem dataLayer übernommen. Datenquelle: dist/op-gtm.js aus ArturJo/secra-op-tracking. Doku: https://github.com/ArturJo/secra-op-tracking/blob/main/GTM-Events-Anleitung.md"
+      }
+    ],
+    "trigger": [
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "triggerId": "10",
+        "name": "SECRA OP – CE – secra_op_object_view",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [
+          {
+            "type": "EQUALS",
+            "parameter": [
+              { "type": "TEMPLATE", "key": "arg0", "value": "{{_event}}" },
+              { "type": "TEMPLATE", "key": "arg1", "value": "secra_op_object_view" }
+            ]
+          }
+        ],
+        "fingerprint": "1",
+        "parentFolderId": "100",
+        "notes": "Teil der SECRA OP Tracking Integration (v2.1.8). Feuert beim Custom Event 'secra_op_object_view' (op-gtm.js, Objektansicht). Doku: https://github.com/ArturJo/secra-op-tracking/blob/main/GTM-Events-Anleitung.md"
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "triggerId": "11",
+        "name": "SECRA OP – CE – secra_op_object_booking",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [
+          {
+            "type": "EQUALS",
+            "parameter": [
+              { "type": "TEMPLATE", "key": "arg0", "value": "{{_event}}" },
+              { "type": "TEMPLATE", "key": "arg1", "value": "secra_op_object_booking" }
+            ]
+          }
+        ],
+        "fingerprint": "1",
+        "parentFolderId": "100",
+        "notes": "Teil der SECRA OP Tracking Integration (v2.1.8). Feuert beim Custom Event 'secra_op_object_booking' (op-gtm.js, Buchungserfolg). Doku: https://github.com/ArturJo/secra-op-tracking/blob/main/GTM-Events-Anleitung.md"
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "triggerId": "12",
+        "name": "SECRA OP – CE – purchase",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [
+          {
+            "type": "EQUALS",
+            "parameter": [
+              { "type": "TEMPLATE", "key": "arg0", "value": "{{_event}}" },
+              { "type": "TEMPLATE", "key": "arg1", "value": "purchase" }
+            ]
+          }
+        ],
+        "fingerprint": "1",
+        "parentFolderId": "100",
+        "notes": "Teil der SECRA OP Tracking Integration (v2.1.8). Feuert beim GA4-Standard-Event 'purchase' (op-gtm.js, Buchungserfolg mit gültigem Preis). Doku: https://github.com/ArturJo/secra-op-tracking/blob/main/GTM-Events-Anleitung.md"
+      }
+    ],
+    "variable": [
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "variableId": "20",
+        "name": "SECRA OP – Const – GA4 Measurement ID",
+        "type": "c",
+        "parameter": [
+          { "type": "TEMPLATE", "key": "value", "value": "G-XXXXXXXX" }
+        ],
+        "fingerprint": "1",
+        "parentFolderId": "100",
+        "notes": "Teil der SECRA OP Tracking Integration (v2.1.8). Hält die GA4 Mess-ID zentral. Wird vom Google Tag (Config) sowie allen GA4-Event-Tags als measurementIdOverride genutzt. NACH IMPORT: 'G-XXXXXXXX' durch die eigene GA4 Mess-ID ersetzen. Doku: https://github.com/ArturJo/secra-op-tracking/blob/main/GTM-Events-Anleitung.md"
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "variableId": "21",
+        "name": "SECRA OP – dlv.object_id",
+        "type": "v",
+        "parameter": [
+          { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" },
+          { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" },
+          { "type": "TEMPLATE", "key": "name", "value": "object_id" }
+        ],
+        "fingerprint": "1",
+        "parentFolderId": "100",
+        "notes": "Teil der SECRA OP Tracking Integration (v2.1.8). Liest object_id aus dem dataLayer (Push durch op-gtm.js bei Objektansicht und Buchungserfolg). Doku: https://github.com/ArturJo/secra-op-tracking/blob/main/GTM-Events-Anleitung.md"
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "variableId": "22",
+        "name": "SECRA OP – dlv.transaction_id",
+        "type": "v",
+        "parameter": [
+          { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" },
+          { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" },
+          { "type": "TEMPLATE", "key": "name", "value": "transaction_id" }
+        ],
+        "fingerprint": "1",
+        "parentFolderId": "100",
+        "notes": "Teil der SECRA OP Tracking Integration (v2.1.8). Liest transaction_id (BuchungNr) aus dem dataLayer (Push durch op-gtm.js bei Buchungserfolg). Doku: https://github.com/ArturJo/secra-op-tracking/blob/main/GTM-Events-Anleitung.md"
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "variableId": "23",
+        "name": "SECRA OP – dlv.value",
+        "type": "v",
+        "parameter": [
+          { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" },
+          { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" },
+          { "type": "TEMPLATE", "key": "name", "value": "value" }
+        ],
+        "fingerprint": "1",
+        "parentFolderId": "100",
+        "notes": "Teil der SECRA OP Tracking Integration (v2.1.8). Liest value (numerischer Buchungspreis in EUR) aus dem dataLayer. op-gtm.js parst den deutschen Anzeigestring (z. B. '1.234,56 €') automatisch zu 1234.56. Doku: https://github.com/ArturJo/secra-op-tracking/blob/main/GTM-Events-Anleitung.md"
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "variableId": "24",
+        "name": "SECRA OP – dlv.currency",
+        "type": "v",
+        "parameter": [
+          { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" },
+          { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" },
+          { "type": "TEMPLATE", "key": "name", "value": "currency" }
+        ],
+        "fingerprint": "1",
+        "parentFolderId": "100",
+        "notes": "Teil der SECRA OP Tracking Integration (v2.1.8). Liest currency aus dem dataLayer (immer 'EUR' durch op-gtm.js gesetzt). Doku: https://github.com/ArturJo/secra-op-tracking/blob/main/GTM-Events-Anleitung.md"
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "variableId": "25",
+        "name": "SECRA OP – dlv.content_type",
+        "type": "v",
+        "parameter": [
+          { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" },
+          { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" },
+          { "type": "TEMPLATE", "key": "name", "value": "content_type" }
+        ],
+        "fingerprint": "1",
+        "parentFolderId": "100",
+        "notes": "Teil der SECRA OP Tracking Integration (v2.1.8). Liest content_type aus dem dataLayer (immer 'vacation_rental' durch op-gtm.js gesetzt). Doku: https://github.com/ArturJo/secra-op-tracking/blob/main/GTM-Events-Anleitung.md"
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "variableId": "26",
+        "name": "SECRA OP – dlv.items",
+        "type": "v",
+        "parameter": [
+          { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" },
+          { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" },
+          { "type": "TEMPLATE", "key": "name", "value": "items" }
+        ],
+        "fingerprint": "1",
+        "parentFolderId": "100",
+        "notes": "Teil der SECRA OP Tracking Integration (v2.1.8). Liest items aus dem dataLayer (Array mit einem Eintrag für das GA4-purchase-Event). Doku: https://github.com/ArturJo/secra-op-tracking/blob/main/GTM-Events-Anleitung.md"
+      }
+    ],
+    "builtInVariable": [
+      { "accountId": "0", "containerId": "0", "type": "PAGE_URL", "name": "Page URL" },
+      { "accountId": "0", "containerId": "0", "type": "PAGE_HOSTNAME", "name": "Page Hostname" },
+      { "accountId": "0", "containerId": "0", "type": "PAGE_PATH", "name": "Page Path" },
+      { "accountId": "0", "containerId": "0", "type": "REFERRER", "name": "Referrer" },
+      { "accountId": "0", "containerId": "0", "type": "EVENT", "name": "Event" }
+    ],
+    "fingerprint": "1",
+    "tagManagerUrl": "https://tagmanager.google.com/"
+  }
+}
