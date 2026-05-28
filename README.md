@@ -12,10 +12,12 @@ Dateien:
 - src/op-gtm.js (GTM / dataLayer – Quellcode mit `__VERSION__`/`__BUILD_DATE__`-Platzhaltern)
 - src/op-gtag.js (GA4 / gtag – Quellcode mit `__VERSION__`/`__BUILD_DATE__`-Platzhaltern)
 - dist/op-gtm.js, dist/op-gtag.js (Auslieferungsdateien mit eingebetteter Version und Build-Datum – diese per CDN einbinden, nicht src/)
-- GTM-Events-Anleitung.md (Schritt-für-Schritt-Anleitung für GTM Events und Conversions)
+- gtm/secra-op-gtm-container.json (importfertige GTM-Container-Vorlage: alle Variablen, Trigger und GA4-Tags für die GTM-Variante)
+- GTM-Events-Anleitung.md (Schritt-für-Schritt-Anleitung für GTM Events und Schlüsselereignisse, inkl. Container-Import)
 - GA4-gtag-Anleitung.md (Schritt-für-Schritt-Anleitung für direkte GA4/gtag Einrichtung)
 - VERSION (aktuelle Versionsnummer für den Build-Prozess)
 - build.sh (Build-Script: kopiert src/ nach dist/ und setzt Version + Build-Datum)
+- release.sh (One-Shot-Release-Script: VERSION schreiben, CHANGELOG-Skelett, Commit, Build, Tag – siehe CLAUDE.md)
 
 Wichtig:
 - Pro Seite nur eine Variante verwenden (GTM oder GA4). Beide gleichzeitig führt zu Doppeltracking.
@@ -61,7 +63,7 @@ Hinweise:
 ## Einbindung der Skripte
 
 - Nicht beide Skripte gleichzeitig verwenden.
-- Empfohlen: Einbindung via jsDelivr-CDN, gepinnt auf einen konkreten Release-Tag (z. B. `@v2.1.6`). Damit ist die Datei unveränderlich gecached und Updates erfolgen kontrolliert durch Anpassen der Versionsnummer.
+- Empfohlen: Einbindung via jsDelivr-CDN, gepinnt auf einen konkreten Release-Tag (`@<release-tag>`, z. B. den aktuellen Tag aus dem Repo). Damit ist die Datei unveränderlich gecached und Updates erfolgen kontrolliert durch Anpassen der Versionsnummer.
 - Eingebunden werden die gebauten Dateien aus `dist/` (mit eingebetteter Version und Build-Datum), nicht die Quellen aus `src/`.
 
 ### Reihenfolge: Tracking-Skript NACH dem OP-Boot-Script
@@ -102,7 +104,7 @@ Hinweise zur URL:
 - Den `@<tag>` immer auf eine konkrete Version pinnen. `@main` oder weglassen würde latest-Builds liefern und Caching schwächen.
 - Bei jedem neuen Release die Versionsnummer in der eigenen Seite mit hochziehen.
 
-## Google Tag Manager (GTM) – src/op-gtm.js
+## Google Tag Manager (GTM) – dist/op-gtm.js
 
 Funktion:
 - Initialisiert `window.dataLayer` (falls nicht vorhanden).
@@ -139,7 +141,7 @@ a) Custom Event (unverändert):
 }
 ```
 
-b) Standard GA4 Purchase Event (neu – befüllt "Gesamtumsatz" in GA4):
+b) Standard GA4 Purchase Event (befüllt "Gesamtumsatz" in GA4):
 ```json
 {
   "event": "purchase",
@@ -156,12 +158,13 @@ b) Standard GA4 Purchase Event (neu – befüllt "Gesamtumsatz" in GA4):
 ```
 - Pflichtfelder: `ObjMetaNr`, `BuchungNr`
 - `value`: Wird aus `data.price` geparst. OP liefert einen deutschen Anzeigestring (z. B. `"1.234,56 €"`), der automatisch zu `1234.56` normalisiert wird.
-- Bei ungültigem/fehlendem Preis: `secra_op_object_booking` sendet `value: 0`; `purchase` wird in der GTM-Variante nur bei gültigem Preis gesendet.
+- Bei ungültigem/fehlendem Preis: `secra_op_object_booking` wird **ohne `value`-Feld** in den dataLayer gepusht (das Feld fehlt komplett, nicht `value: 0`); `purchase` wird **gar nicht** gepusht.
 
 Hinweise:
 - Die Parameter sind bewusst minimal und GA4‑freundlich. Mapping in GTM (Variablen/Tags) erfolgt durch Sie.
+- **Schnelleinrichtung in GTM:** Statt Variablen/Trigger/Tags manuell anzulegen, kann die fertige Container-Vorlage `gtm/secra-op-gtm-container.json` importiert werden – alle Bausteine sind mit Prefix `SECRA OP – ` versehen und im Ordner „SECRA OP Tracking" gruppiert, um Konflikte mit bestehenden Tags zu vermeiden. Details: siehe `GTM-Events-Anleitung.md`, Abschnitt 2.
 
-## Google Analytics 4 (gtag) – src/op-gtag.js
+## Google Analytics 4 (gtag) – dist/op-gtag.js
 
 Funktion:
 - Registriert die gleichen Hooks und sendet GA4‑Events via `gtag('event', ...)`.
@@ -208,7 +211,7 @@ b) Standard GA4 Event: `purchase` (befüllt "Gesamtumsatz" in GA4-Berichten)
 }
 ```
 - `value` wird aus dem deutschen Preisstring der OP-API normalisiert (z. B. `"1.234,56 €"` → `1234.56`)
-- Fallback `value: 0` bei fehlendem/ungültigem Preis (nur `secra_op_object_booking`; `purchase` wird in der GTM-Variante bei Preis `0` nicht gefeuert)
+- Fallback `value: 0` bei fehlendem/ungültigem Preis – bei **beiden** Events (`secra_op_object_booking` UND `purchase`). Im Unterschied zur GTM-Variante wird `purchase` hier also auch bei ungültigem Preis gesendet (mit `value: 0`).
 - Bei aktiviertem Debug-Modus (`window.secra_op_client.tracking.debug = true`) erscheint eine Konsolen-Warnung, wenn der Preis fehlt oder ungültig ist
 
 ### Optionales Debug‑Logging (nur op-gtag.js)
