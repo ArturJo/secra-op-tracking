@@ -43,7 +43,7 @@ Hinweise:
   <!-- Seite/Inhalt ... -->
 
   <!-- direkt vor </body>: Tracking zuletzt -->
-  <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.8/dist/op-gtag.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.2.0/dist/op-gtag.js"></script>
 </body>
 ```
 
@@ -125,7 +125,7 @@ Vor dem Laden von `src/op-gtag.js` können Sie Debug-Logs aktivieren:
   window.secra_op_client.tracking = window.secra_op_client.tracking || {};
   window.secra_op_client.tracking.debug = true; // Debug aktivieren
 </script>
-<script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.8/dist/op-gtag.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.2.0/dist/op-gtag.js"></script>
 ```
 
 - Wenn `debug = true` und `gtag` fehlt, erscheint eine Warnung: "gtag() is not available — event skipped." (nicht fatal).

@@ -82,7 +82,7 @@ GTM (dataLayer) Beispiel:
 <body>
   <!-- Seite/Inhalt ... -->
   <!-- direkt vor </body>: Tracking ZULETZT -->
-  <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.8/dist/op-gtm.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.2.0/dist/op-gtm.js"></script>
 </body>
 ```
 
@@ -95,7 +95,7 @@ GA4 (gtag) Beispiel:
 </head>
 <body>
   <!-- Seite/Inhalt ... -->
-  <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.8/dist/op-gtag.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.2.0/dist/op-gtag.js"></script>
 </body>
 ```
 
@@ -242,7 +242,7 @@ Vor Einbindung von `src/op-gtag.js` kann ein Debug‑Flag gesetzt werden:
   window.secra_op_client.tracking = window.secra_op_client.tracking || {};
   window.secra_op_client.tracking.debug = true; // Debug aktivieren
 </script>
-<script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.8/dist/op-gtag.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.2.0/dist/op-gtag.js"></script>
 ```
 
 - Wenn `debug = true` und `gtag` fehlt oder ein Fehler beim Senden auftritt, erscheinen Warnungen in der Konsole (z. B. "gtag() is not available — event skipped.").

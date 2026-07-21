@@ -25,7 +25,7 @@ Wichtiger Hinweis:
   <!-- Seite/Inhalt ... -->
 
   <!-- direkt vor </body>: Tracking zuletzt -->
-  <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.1.8/dist/op-gtm.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/ArturJo/secra-op-tracking@v2.2.0/dist/op-gtm.js"></script>
 </body>
 ```
 

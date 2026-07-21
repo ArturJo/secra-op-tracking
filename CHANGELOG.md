@@ -5,6 +5,24 @@ All notable changes to the SECRA OP Tracking scripts will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-07-21
+
+### Added
+  - Vollständige Abdeckung der offiziellen OP-Eventliste (https://docs.optimale-praesentation.de/1-Client-Einbindung/3-Tracking.html#eventliste): beide Skripte registrieren jetzt alle 9 dokumentierten Hooks statt nur `object:load` und `booking:submit-success`
+  - Neue Custom Events: `secra_op_search_load`, `secra_op_search_view`, `secra_op_object_share`, `secra_op_booking_load`, `secra_op_booking_render_step` (mit Parameter `step`), `secra_op_booking_submit_error` und `secra_op_contactform_submit` — damit ist der komplette Buchungs-Funnel (Einstieg → Schritte → Abbruch/Erfolg) in GTM/GA4 abbildbar
+  - GA4-Standard-Events zusätzlich zu den Custom Events: `begin_checkout` bei `booking:load` und `generate_lead` bei `contactform:submit` — GA4-Trichter-/E-Commerce-Berichte und Schlüsselereignisse funktionieren ohne eigenes Mapping
+  - `gtm/secra-op-gtm-container.json`: Trigger und GA4-Event-Tags für alle neuen Events (12 Trigger, 12 Event-Tags) sowie neue Data-Layer-Variablen `dlv.step`, `dlv.name`, `dlv.mode`
+
+### Changed
+  - `README.md`, `GTM-Events-Anleitung.md`, `GA4-gtag-Anleitung.md`: Event-Übersichten als vollständige Tabellen (OP-Hook → Event → Payload), Hinweise zu Schlüsselereignissen um `generate_lead`/`secra_op_contactform_submit` ergänzt
+  - Interne Vereinfachung: gemeinsame Factory für Events, die nur `{ObjMetaNr}` tragen (`search:view`, `object:load`, `object:share`)
+
+### Kompatibilität
+  - Bestandsintegrationen bleiben unverändert: Eventnamen und Payloads von `secra_op_object_view`, `secra_op_object_booking` und `purchase` sind eingefroren; es kommen ausschließlich neue Events hinzu
+
+
+---
+
 ## [2.1.8] - 2026-05-15
 
 ### Fixed
