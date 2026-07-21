@@ -108,10 +108,28 @@ Hinweise zur URL:
 
 Funktion:
 - Initialisiert `window.dataLayer` (falls nicht vorhanden).
-- Registriert Event‑Handler an `window.secra_op_client.tracking`.
-- Pusht zwei Custom Events in den dataLayer.
+- Registriert Event‑Handler an allen dokumentierten OP-Hooks unter `window.secra_op_client.tracking`.
+- Pusht die Events in den dataLayer.
 
-Gesendete Events und Payloads:
+Gesendete Events und Payloads (alle 9 OP-Hooks der offiziellen Eventliste sind abgedeckt):
+
+| OP-Hook | dataLayer-Event | Payload |
+|---|---|---|
+| `search:load` | `secra_op_search_load` | – |
+| `search:view` | `secra_op_search_view` | `object_id`, `content_type` |
+| `object:load` | `secra_op_object_view` | `object_id`, `content_type` |
+| `object:share` | `secra_op_object_share` | `object_id`, `content_type` |
+| `booking:load` | `secra_op_booking_load` **+** `begin_checkout` | `object_id`, `content_type`; `begin_checkout` mit `items[]` |
+| `booking:render-step` | `secra_op_booking_render_step` | `object_id`, `step`, `content_type` |
+| `booking:submit-error` | `secra_op_booking_submit_error` | `object_id`, `name` (falls geliefert), `content_type` |
+| `booking:submit-success` | `secra_op_object_booking` **+** `purchase` | siehe unten |
+| `contactform:submit` | `secra_op_contactform_submit` **+** `generate_lead` | `mode`, `object_id` (falls geliefert) |
+
+- `object_id` ist immer `String(ObjMetaNr)` (beim Kontaktformular: `String(objectId)`), `content_type` immer `"vacation_rental"`.
+- Die GA4-Standard-Events `begin_checkout`, `purchase` und `generate_lead` werden zusätzlich gefeuert, damit GA4-Trichter-/E-Commerce-Berichte ohne eigenes Mapping funktionieren.
+- Objektbezogene Events ohne `ObjMetaNr` in den OP-Daten werden verworfen (kein Push).
+
+Details zum Buchungserfolg:
 
 1) Objektansicht (Ferienunterkunft)
 - Auslöser: `window.secra_op_client.tracking.object.load`
@@ -168,7 +186,7 @@ Hinweise:
 
 Funktion:
 - Registriert die gleichen Hooks und sendet GA4‑Events via `gtag('event', ...)`.
-- Identische Eventnamen und Parameter wie in der GTM‑Variante.
+- Identische Eventnamen und Parameter wie in der GTM‑Variante (siehe Tabelle oben).
 
 Gesendete Events und Parameter:
 
@@ -233,8 +251,10 @@ Vor Einbindung von `src/op-gtag.js` kann ein Debug‑Flag gesetzt werden:
 ## Kompatibilität & Migration
 
 - Aktuelle Implementierung verwendet snake_case Eventnamen und Parameter:
-  - Events: `secra_op_object_view`, `secra_op_object_booking`, `purchase`
-  - Parameter: `object_id`, `transaction_id`, `currency`, `value`, `content_type`, `items[]` (nur bei `purchase`)
+  - Custom Events: `secra_op_search_load`, `secra_op_search_view`, `secra_op_object_view`, `secra_op_object_share`, `secra_op_booking_load`, `secra_op_booking_render_step`, `secra_op_booking_submit_error`, `secra_op_object_booking`, `secra_op_contactform_submit`
+  - GA4-Standard-Events: `purchase`, `begin_checkout`, `generate_lead`
+  - Parameter: `object_id`, `transaction_id`, `currency`, `value`, `content_type`, `step`, `name`, `mode`, `items[]` (nur bei `purchase`/`begin_checkout`)
+- Bestandsintegrationen (bis v2.1.8: nur `secra_op_object_view`, `secra_op_object_booking`, `purchase`) funktionieren unverändert weiter – Eventnamen und Payloads dieser drei Events sind unverändert, es kommen nur neue Events hinzu.
 - Ältere Dokumentation/Vorversionen enthielten camelCase Events und zusätzliche, vendor‑spezifische Alias‑Keys (`secraObjectId`, `secraEventCategory` etc.). Diese werden nicht mehr gesendet.
 - Passen Sie ggf. GTM Trigger/Variablen und GA4 Berichte auf die obigen, aktuellen Namen an.
 

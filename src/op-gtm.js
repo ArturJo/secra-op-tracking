@@ -15,18 +15,83 @@ window.secra_op_client.tracking = window.secra_op_client.tracking || {};
 window.secra_op_client.tracking.search = window.secra_op_client.tracking.search || {};
 window.secra_op_client.tracking.object = window.secra_op_client.tracking.object || {};
 window.secra_op_client.tracking.booking = window.secra_op_client.tracking.booking || {};
+window.secra_op_client.tracking.contactform = window.secra_op_client.tracking.contactform || {};
+
+// Factory for events that only carry the object reference ({ObjMetaNr})
+var makeObjectEventSender = function (eventName) {
+    return function (mod, event, data) {
+        if (!data || !data.ObjMetaNr) {
+            return;
+        }
+        window.dataLayer.push({
+            event: eventName,
+            object_id: String(data.ObjMetaNr),
+            content_type: 'vacation_rental'
+        });
+    };
+};
 
 // Custom event: object view (holiday accommodation)
-var sendObjectView = function (mod, event, data) {
+var sendObjectView = makeObjectEventSender('secra_op_object_view');
+
+// Custom event: search widget loaded (once per page load, no extra data)
+var sendSearchLoad = function (mod, event, data) {
+    window.dataLayer.push({
+        event: 'secra_op_search_load'
+    });
+};
+
+// Custom event: booking funnel loaded for an object
+var sendBookingLoad = function (mod, event, data) {
     if (!data || !data.ObjMetaNr) {
         return;
     }
     window.dataLayer.push({
-        event: 'secra_op_object_view',
+        event: 'secra_op_booking_load',
         object_id: String(data.ObjMetaNr),
         content_type: 'vacation_rental'
-        // Add more business-critical parameters here only if truly needed for GTM mapping
     });
+
+    // Standard GA4 begin_checkout event — enables GA4 funnel/checkout reports
+    window.dataLayer.push({
+        event: 'begin_checkout',
+        items: [{
+            item_id: String(data.ObjMetaNr),
+            quantity: 1
+        }]
+    });
+};
+
+// Custom event: booking step rendered (fires on every step of the funnel)
+var sendBookingRenderStep = function (mod, event, data) {
+    if (!data || !data.ObjMetaNr) {
+        return;
+    }
+    var dl = {
+        event: 'secra_op_booking_render_step',
+        object_id: String(data.ObjMetaNr),
+        content_type: 'vacation_rental'
+    };
+    if (data.step !== undefined && data.step !== null) {
+        dl.step = String(data.step);
+    }
+    window.dataLayer.push(dl);
+};
+
+// Custom event: booking submit failed
+var sendBookingSubmitError = function (mod, event, data) {
+    if (!data || !data.ObjMetaNr) {
+        return;
+    }
+    var dl = {
+        event: 'secra_op_booking_submit_error',
+        object_id: String(data.ObjMetaNr),
+        content_type: 'vacation_rental'
+    };
+    if (data.name) {
+        dl.name = String(data.name); // passed through as delivered by OP
+    }
+    window.dataLayer.push(dl);
 };
 
 // Custom event: booking success (holiday accommodation)
@@ -68,8 +133,34 @@ var sendBookingSuccess = function (mod, event, data) {
     }
 };
 
+// Custom event: non-binding contact form submitted ({mode, objectId})
+var sendContactformSubmit = function (mod, event, data) {
+    var dl = {
+        event: 'secra_op_contactform_submit'
+    };
+    if (data && data.mode !== undefined && data.mode !== null) {
+        dl.mode = String(data.mode);
+    }
+    if (data && data.objectId !== undefined && data.objectId !== null) {
+        dl.object_id = String(data.objectId);
+    }
+    window.dataLayer.push(dl);
+
+    // Standard GA4 generate_lead event — usable as Key Event without extra mapping
+    window.dataLayer.push({
+        event: 'generate_lead'
+    });
+};
+
 // Register handlers with the SECRA OP client tracking hooks immediately
 (function initEvents() {
+    window.secra_op_client.tracking.search.load = sendSearchLoad;
+    window.secra_op_client.tracking.search.view = makeObjectEventSender('secra_op_search_view');
     window.secra_op_client.tracking.object.load = sendObjectView;
+    window.secra_op_client.tracking.object.share = makeObjectEventSender('secra_op_object_share');
+    window.secra_op_client.tracking.booking.load = sendBookingLoad;
+    window.secra_op_client.tracking.booking['render-step'] = sendBookingRenderStep;
+    window.secra_op_client.tracking.booking['submit-error'] = sendBookingSubmitError;
     window.secra_op_client.tracking.booking['submit-success'] = sendBookingSuccess;
+    window.secra_op_client.tracking.contactform.submit = sendContactformSubmit;
 })();

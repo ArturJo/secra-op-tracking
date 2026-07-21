@@ -51,23 +51,33 @@ Warum diese Reihenfolge: Empirisch festgestellt — die nachgeladenen OP-Module 
 
 Hinweise:
 - Eingebunden wird die gebaute Datei aus `dist/` (enthält Version und Build-Datum), nicht die Quelle aus `src/`.
-- Den Tag (`@v2.1.6`) immer auf eine konkrete Version pinnen – `@main` oder weglassen würde latest-Builds liefern und das Caching schwächen.
+- Den Tag (`@<release-tag>`) immer auf eine konkrete Version pinnen – `@main` oder weglassen würde latest-Builds liefern und das Caching schwächen.
 - Bei einem neuen Release die Versionsnummer in der eigenen Seite mit hochziehen.
 
 Das Skript registriert sich an den SECRA OP Hooks und sendet beim Eintreten der Ereignisse die GA4-Events über `gtag('event', ...)`.
 
 ## 4) Welche Events und Parameter werden gesendet?
 
-Das Skript sendet folgende GA4-Ereignisse mit diesen Parametern:
+Das Skript deckt alle in der [OP-Doku](https://docs.optimale-praesentation.de/1-Client-Einbindung/3-Tracking.html#eventliste) dokumentierten Tracking-Hooks ab und sendet folgende GA4-Ereignisse:
 
-1) Objektansicht (Ferienunterkunft)
-- Event-Name: `secra_op_object_view`
-- Parameter:
-  - `object_id`: String (z. B. "12345")
-  - `content_type`: "vacation_rental"
+| OP-Hook | GA4-Event | Parameter | Bemerkung |
+|---|---|---|---|
+| `search:load` | `secra_op_search_load` | – | Suche geladen (einmalig pro Seitenaufruf) |
+| `search:view` | `secra_op_search_view` | `object_id`, `content_type` | Objekt in der Suche geladen |
+| `object:load` | `secra_op_object_view` | `object_id`, `content_type` | Objektansicht (Ferienunterkunft) |
+| `object:share` | `secra_op_object_share` | `object_id`, `content_type` | Share-Button genutzt |
+| `booking:load` | `secra_op_booking_load` **+** `begin_checkout` | `object_id`, `content_type`; `begin_checkout` mit `items[]` | Einstieg in die Buchungsstrecke |
+| `booking:render-step` | `secra_op_booking_render_step` | `object_id`, `step`, `content_type` | feuert bei jedem Buchungsschritt |
+| `booking:submit-error` | `secra_op_booking_submit_error` | `object_id`, `name` (falls geliefert), `content_type` | fehlgeschlagene Buchung |
+| `booking:submit-success` | `secra_op_object_booking` **+** `purchase` | siehe unten | erfolgreiche Buchung |
+| `contactform:submit` | `secra_op_contactform_submit` **+** `generate_lead` | `mode`, `object_id` (falls geliefert) | unverbindliche Anfrage verschickt |
 
-2) Buchung erfolgreich
-- Es werden zwei Events gefeuert:
+Hinweise:
+- Die GA4-Standard-Events `begin_checkout` und `generate_lead` werden zusätzlich zu den Custom Events gefeuert, damit GA4-Trichter-/E-Commerce-Berichte ohne eigenes Mapping funktionieren.
+- Das Feld `name` bei `secra_op_booking_submit_error` wird unverändert durchgereicht, wie es die OP-API liefert.
+- Laut OP-Doku können alle Events innerhalb eines Seitenaufrufs mehrfach auslösen, da Nutzer ohne Seitenwechsel andere dynamische Inhalte laden können.
+
+Details zum Buchungserfolg (`booking:submit-success`) – es werden zwei Events gefeuert:
 
 a) Custom Event: `secra_op_object_booking`
 - Parameter:
@@ -93,6 +103,7 @@ Markieren Sie relevante Ereignisse als Conversions direkt in GA4:
 - GA4 Admin → Conversions → New Conversion Event
 - Tragen Sie den exakten Ereignisnamen ein, z. B.:
   - `secra_op_object_booking` (Buchungsabschluss)
+  - `generate_lead` oder `secra_op_contactform_submit` (unverbindliche Anfrage)
   - optional: `secra_op_object_view` (nur falls fachlich wirklich ein Conversion-Ziel)
 - Ab jetzt zählt GA4 jedes Eintreffen dieser Ereignisse als Conversion.
 
@@ -147,8 +158,9 @@ Passen Sie die Defaults an Ihr CMP und Ihre Rechtslage an. Stellen Sie sicher, d
 
 ## 10) Kurzübersicht: Was ist nach dieser Anleitung eingerichtet?
 
-- GA4 (gtag.js) sendet direkt drei Ereignisse an GA4: `secra_op_object_view`, `secra_op_object_booking` und `purchase`.
+- GA4 (gtag.js) sendet direkt 12 Ereignisse an GA4: alle 9 OP-Hooks als `secra_op_*` Custom Events plus die GA4-Standard-Events `purchase`, `begin_checkout` und `generate_lead`.
+- Der komplette Buchungs-Funnel ist abbildbar: `secra_op_booking_load` → `secra_op_booking_render_step` (mit `step`) → `secra_op_object_booking`/`secra_op_booking_submit_error`.
 - `purchase` befüllt automatisch die Spalte "Gesamtumsatz" in GA4 → Engagement → Ereignisse.
-- `secra_op_object_booking` kann zusätzlich als Conversion markiert werden.
+- `secra_op_object_booking` und `generate_lead` können zusätzlich als Schlüsselereignis (Key Event) markiert werden.
 - Optionales Debug-Logging kann beim Implementieren helfen.
 

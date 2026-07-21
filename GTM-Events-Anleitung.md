@@ -48,10 +48,10 @@ Sie enthält alle in dieser Anleitung beschriebenen Bausteine. **Alle Namen trag
 
 - **1 Ordner:** `SECRA OP Tracking` – gruppiert alle unten genannten Bausteine
 - **1 Konstante:** `SECRA OP – Const – GA4 Measurement ID` (Default `G-XXXXXXXX`, muss ersetzt werden)
-- **6 Data Layer-Variablen (Version 2):** `SECRA OP – dlv.object_id`, `SECRA OP – dlv.transaction_id`, `SECRA OP – dlv.value`, `SECRA OP – dlv.currency`, `SECRA OP – dlv.content_type`, `SECRA OP – dlv.items`
-- **3 Custom Event Trigger:** `SECRA OP – CE – secra_op_object_view`, `SECRA OP – CE – secra_op_object_booking`, `SECRA OP – CE – purchase`
+- **9 Data Layer-Variablen (Version 2):** `SECRA OP – dlv.object_id`, `SECRA OP – dlv.transaction_id`, `SECRA OP – dlv.value`, `SECRA OP – dlv.currency`, `SECRA OP – dlv.content_type`, `SECRA OP – dlv.items`, `SECRA OP – dlv.step`, `SECRA OP – dlv.name`, `SECRA OP – dlv.mode`
+- **12 Custom Event Trigger:** je ein `SECRA OP – CE – <event>` Trigger für jedes in Abschnitt 3 gelistete Event (alle `secra_op_*` Custom Events sowie `purchase`, `begin_checkout` und `generate_lead`)
 - **1 Google Tag (GA4 Config, `googtag`):** `SECRA OP – Google Tag – GA4 (Config)` auf „All Pages"
-- **3 GA4-Event-Tags:** `SECRA OP – GA4 – Event – secra_op_object_view`, `SECRA OP – GA4 – Event – secra_op_object_booking`, `SECRA OP – GA4 – Event – purchase` (`purchase` mit aktivierter E-Commerce-Datenübernahme aus dem dataLayer)
+- **12 GA4-Event-Tags:** je ein `SECRA OP – GA4 – Event – <event>` Tag pro Trigger (`purchase` und `begin_checkout` mit aktivierter E-Commerce-Datenübernahme aus dem dataLayer)
 
 Zusätzlich trägt **jeder einzelne Baustein ein Notes-Feld** mit Zweck-Beschreibung, Versionsangabe und Doku-Link – sichtbar im GTM-UI per Hover/Klick auf das Notiz-Icon.
 
@@ -75,7 +75,7 @@ Zusätzlich trägt **jeder einzelne Baustein ein Notes-Feld** mit Zweck-Beschrei
 
 ### Konflikt-Strategie und Wiederverwendung bestehender Bausteine
 
-- **Bestehender Google Tag (GA4 Config) im Container:** Den importierten `SECRA OP – Google Tag – GA4 (Config)` pausieren oder löschen und in den drei `SECRA OP – GA4 – Event – …` Tags den Eintrag „Messung-ID" auf die bestehende Mess-ID-Variable umstellen. Damit läuft nur eine GA4-Config im Container.
+- **Bestehender Google Tag (GA4 Config) im Container:** Den importierten `SECRA OP – Google Tag – GA4 (Config)` pausieren oder löschen und in allen `SECRA OP – GA4 – Event – …` Tags den Eintrag „Messung-ID" auf die bestehende Mess-ID-Variable umstellen. Damit läuft nur eine GA4-Config im Container.
 - **Bestehende Mess-ID-Konstante im Container:** Analog: die importierte `SECRA OP – Const – GA4 Measurement ID` löschen, in den GA4-Event-Tags und im Google Tag (Config) auf die bestehende Konstante umstellen.
 - **Bestehende generische DataLayer-Variablen (`dlv.value`, `dlv.items` etc.):** Werden durch das Prefix nicht überschrieben – die importierten `SECRA OP – dlv.*` koexistieren mit deinen vorhandenen.
 
@@ -87,16 +87,26 @@ Zusätzlich trägt **jeder einzelne Baustein ein Notes-Feld** mit Zweck-Beschrei
 
 ## 3) Welche Events werden gesendet?
 
-Das Skript `dist/op-gtm.js` pusht folgende Custom Events in den dataLayer:
+Das Skript `dist/op-gtm.js` deckt alle in der [OP-Doku](https://docs.optimale-praesentation.de/1-Client-Einbindung/3-Tracking.html#eventliste) dokumentierten Tracking-Hooks ab und pusht folgende Events in den dataLayer:
 
-1) Objektansicht (Ferienunterkunft)
-- Event-Name: secra_op_object_view
-- Payload:
-  - object_id: String (z. B. "12345")
-  - content_type: "vacation_rental"
+| OP-Hook | dataLayer-Event | Payload | Bemerkung |
+|---|---|---|---|
+| `search:load` | `secra_op_search_load` | – | Suche geladen (einmalig pro Seitenaufruf) |
+| `search:view` | `secra_op_search_view` | `object_id`, `content_type` | Objekt in der Suche geladen |
+| `object:load` | `secra_op_object_view` | `object_id`, `content_type` | Objektansicht (Ferienunterkunft) |
+| `object:share` | `secra_op_object_share` | `object_id`, `content_type` | Share-Button genutzt |
+| `booking:load` | `secra_op_booking_load` **+** `begin_checkout` | `object_id`, `content_type`; `begin_checkout` mit `items[]` | Einstieg in die Buchungsstrecke |
+| `booking:render-step` | `secra_op_booking_render_step` | `object_id`, `step`, `content_type` | feuert bei jedem Buchungsschritt |
+| `booking:submit-error` | `secra_op_booking_submit_error` | `object_id`, `name` (falls geliefert), `content_type` | fehlgeschlagene Buchung |
+| `booking:submit-success` | `secra_op_object_booking` **+** `purchase` | siehe unten | erfolgreiche Buchung |
+| `contactform:submit` | `secra_op_contactform_submit` **+** `generate_lead` | `mode`, `object_id` (falls geliefert) | unverbindliche Anfrage verschickt |
 
-2) Buchung erfolgreich
-- Es werden zwei dataLayer Pushes ausgeführt:
+Hinweise:
+- Die GA4-Standard-Events `begin_checkout` und `generate_lead` werden zusätzlich zu den Custom Events gefeuert, damit GA4-Trichter-/E-Commerce-Berichte ohne eigenes Mapping funktionieren.
+- Das Feld `name` bei `secra_op_booking_submit_error` wird unverändert durchgereicht, wie es die OP-API liefert.
+- Laut OP-Doku können alle Events innerhalb eines Seitenaufrufs mehrfach auslösen, da Nutzer ohne Seitenwechsel andere dynamische Inhalte laden können.
+
+Details zum Buchungserfolg (`booking:submit-success`) – es werden zwei dataLayer Pushes ausgeführt:
 
 a) Custom Event: secra_op_object_booking
 - Payload:
@@ -130,6 +140,9 @@ Legen Sie für die aus dem dataLayer gelesenen Felder Variablen an (Typ: Data La
 - Name: `SECRA OP – dlv.currency` → Data Layer Variable Name: `currency`, Version: 2
 - Name: `SECRA OP – dlv.content_type` → Data Layer Variable Name: `content_type`, Version: 2
 - Name: `SECRA OP – dlv.items` → Data Layer Variable Name: `items`, Version: 2
+- Name: `SECRA OP – dlv.step` → Data Layer Variable Name: `step`, Version: 2
+- Name: `SECRA OP – dlv.name` → Data Layer Variable Name: `name`, Version: 2
+- Name: `SECRA OP – dlv.mode` → Data Layer Variable Name: `mode`, Version: 2
 
 Zusätzlich Konstante:
 - Name: `SECRA OP – Const – GA4 Measurement ID`, Typ: Konstante, Wert: `G-XXXXXXXX` (eigene Mess-ID eintragen)
@@ -138,22 +151,20 @@ Optional: Legen Sie eine Data Layer-Variable für `event` an, um in Debugging-Si
 
 ## 5) Trigger (Auslöser) in GTM anlegen (manueller Weg)
 
-Legen Sie drei Custom Event Trigger an:
+Legen Sie für jedes Event aus Abschnitt 3 einen Custom Event Trigger nach demselben Muster an (Typ: Benutzerdefiniertes Ereignis, Übereinstimmung: Genau passend, Name: `SECRA OP – CE – <event>`):
 
-- Trigger: `SECRA OP – CE – secra_op_object_view`
-  - Typ: Benutzerdefiniertes Ereignis (Custom Event)
-  - Event-Name: `secra_op_object_view`
-  - Übereinstimmung: Genau passend
-
-- Trigger: `SECRA OP – CE – secra_op_object_booking`
-  - Typ: Benutzerdefiniertes Ereignis (Custom Event)
-  - Event-Name: `secra_op_object_booking`
-  - Übereinstimmung: Genau passend
-
-- Trigger: `SECRA OP – CE – purchase`
-  - Typ: Benutzerdefiniertes Ereignis (Custom Event)
-  - Event-Name: `purchase`
-  - Übereinstimmung: Genau passend
+- `secra_op_search_load`
+- `secra_op_search_view`
+- `secra_op_object_view`
+- `secra_op_object_share`
+- `secra_op_booking_load`
+- `secra_op_booking_render_step`
+- `secra_op_booking_submit_error`
+- `secra_op_object_booking`
+- `secra_op_contactform_submit`
+- `purchase`
+- `begin_checkout`
+- `generate_lead`
 
 ## 6) GA4 Konfiguration in GTM (manueller Weg, falls noch nicht vorhanden)
 
@@ -202,6 +213,22 @@ Hinweis: Existiert im Container bereits ein Google Tag / GA4 Config Tag, diesen 
     - `items` → `{{SECRA OP – dlv.items}}`
   - Auslöser: `SECRA OP – CE – purchase`
 
+4) Übrige Events (gleiches Muster)
+
+Die restlichen Tags folgen exakt dem Muster aus 1) — Typ `gaawe`, Messung-ID-Override, Ereignisname = Custom-Event-Name, Auslöser = zugehöriger `SECRA OP – CE – …` Trigger:
+
+| Tag / Ereignisname | Ereignisparameter |
+|---|---|
+| `secra_op_search_load` | – |
+| `secra_op_search_view` | `object_id`, `content_type` |
+| `secra_op_object_share` | `object_id`, `content_type` |
+| `secra_op_booking_load` | `object_id`, `content_type` |
+| `secra_op_booking_render_step` | `object_id`, `step`, `content_type` |
+| `secra_op_booking_submit_error` | `object_id`, `name`, `content_type` |
+| `secra_op_contactform_submit` | `mode`, `object_id` |
+| `begin_checkout` | – (E-Commerce-Daten senden: aktiv, Quelle: Data Layer → übernimmt `items[]`) |
+| `generate_lead` | – |
+
 Hinweis: In GA4 können Sie diese Ereignisnamen als Schlüsselereignisse (Key Events) markieren (siehe Abschnitt 8).
 
 ## 8) Schlüsselereignisse in GA4 markieren (empfohlen)
@@ -215,6 +242,7 @@ Es gibt zwei gängige Wege, einen Buchungsabschluss als geschäftsrelevantes Ere
 - **GA4 Admin → Datenanzeige → Schlüsselereignisse → „Neues Schlüsselereignis"** (oder im Bereich **Ereignisse** den Toggle „Als Schlüsselereignis markieren" pro Zeile aktivieren)
 - Tragen Sie den exakten Ereignisnamen ein, z. B.:
   - `secra_op_object_booking` (Buchungsabschluss)
+  - `generate_lead` oder `secra_op_contactform_submit` (unverbindliche Anfrage)
   - optional: `secra_op_object_view` (nur wenn dies für Sie ein echtes Schlüsselereignis ist)
 - Ab jetzt zählt GA4 jedes Eintreffen dieser Ereignisse als Schlüsselereignis – in Berichten unter **Engagement → Conversions** (Reporting-Begriff) bzw. **Werbung → Performance** sichtbar.
 
@@ -284,7 +312,7 @@ Vorteil des zentralen Wegs: Der `user_data`-Parameter im Google Tag wird von all
 ## 9) Testen & Debugging
 
 - GTM Vorschau (Preview) starten, Ihre Seite laden.
-- Prüfen, ob die Custom Events secra_op_object_view und secra_op_object_booking im Debug Panel erscheinen.
+- Prüfen, ob die Custom Events aus Abschnitt 3 im Debug Panel erscheinen (mindestens `secra_op_search_load` bzw. `secra_op_object_view` sollten sofort beim Laden der jeweiligen Ansicht kommen; die `secra_op_booking_*` Events beim Durchklicken der Buchungsstrecke).
 - Kontrollieren, ob die GA4 Event Tags korrekt auslösen und die Parameter gesetzt werden.
 - In GA4: DebugView prüfen (entwicklerseitig) – Ereignisnamen und Parameter sollten sichtbar sein.
 - Bei Google Ads Conversions: Tag Assistant und Conversion-Diagnose nutzen.
@@ -304,9 +332,10 @@ Vorteil des zentralen Wegs: Der `user_data`-Parameter im Google Tag wird von all
 
 ## 12) Kurzübersicht: Was ist nach dieser Anleitung eingerichtet?
 
-- 3 Events werden per GTM an GA4 gesendet: `secra_op_object_view`, `secra_op_object_booking`, `purchase`.
+- 12 Events werden per GTM an GA4 gesendet: alle 9 OP-Hooks als `secra_op_*` Custom Events plus die GA4-Standard-Events `purchase`, `begin_checkout` und `generate_lead`.
+- Der komplette Buchungs-Funnel ist abbildbar: `secra_op_booking_load` → `secra_op_booking_render_step` (mit `step`) → `secra_op_object_booking`/`secra_op_booking_submit_error`.
 - `purchase` befüllt automatisch die Spalte "Gesamtumsatz" in GA4 → Engagement → Ereignisse.
-- `secra_op_object_booking` kann zusätzlich als Schlüsselereignis in GA4 markiert oder an Google Ads als Conversion gemeldet werden.
+- `secra_op_object_booking` und `generate_lead` können zusätzlich als Schlüsselereignis in GA4 markiert oder an Google Ads als Conversion gemeldet werden.
 - Saubere Trennung zwischen Datenerhebung (Events) und Zieldetektion (Schlüsselereignisse in GA4, Conversions in Google Ads).
 
 
